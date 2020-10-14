@@ -1,12 +1,11 @@
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import TestGame from './components/testGame';
 
 function App(): JSX.Element {
   return (
     <View style={styles.container}>
-      <View >
-        <Text> Hello, world! </Text>
-      </View>
+      <TestGame/>
     </View>
   );
 }
@@ -14,6 +13,8 @@ function App(): JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
