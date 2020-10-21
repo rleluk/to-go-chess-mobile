@@ -1,16 +1,13 @@
 import React from 'react';
 import {
-  TextInput,
   View,
   StyleSheet,
-  TouchableOpacity,
-  Text,
-  ScrollView,
 } from 'react-native';
-import {Subject} from 'rxjs';
-import {Game} from '../common/core/game';
-import {Chessboard} from '../common/core/chessboard';
-import {Player} from '../common/interfaces/player';
+import { Subject } from 'rxjs';
+import { Game } from '../common/core/game';
+import { Chessboard } from '../common/core/chessboard';
+import { Player } from '../common/interfaces/player';
+import { MobileChessboard } from './mobileChessboard';
 
 class ChessPlayer implements Player {
   color: 'white' | 'black';
@@ -30,8 +27,6 @@ interface State {
   whitePlayer: ChessPlayer;
   blackPlayer: ChessPlayer;
   chessboard: Chessboard;
-  inputText: string;
-  gameState: string;
 }
 
 interface Props {}
@@ -43,62 +38,38 @@ class TestGame extends React.Component<Props, State> {
     let chessboard = new Chessboard();
     let wp = new ChessPlayer();
     let bp = new ChessPlayer();
-    game.init({canvas: chessboard, whitePlayer: wp, blackPlayer: bp});
+    game.init({ canvas: chessboard, whitePlayer: wp, blackPlayer: bp });
 
     this.state = {
       currentPlayer: wp,
       whitePlayer: wp,
       blackPlayer: bp,
-      inputText: '',
       chessboard: chessboard,
-      gameState: '',
     };
   }
 
   render() {
-    const {currentPlayer, chessboard, whitePlayer, blackPlayer, inputText, gameState} = this.state;
-    const onButtonPress = () => {
-        currentPlayer.move(inputText);
-        this.setState({inputText: ''});
-        if (currentPlayer === whitePlayer) this.setState({currentPlayer: blackPlayer});
-        if (currentPlayer === blackPlayer) this.setState({currentPlayer: whitePlayer});
-        this.setState({gameState: `${gameState}\n${chessboard.positionFEN}`});
+    const {
+      currentPlayer,
+      chessboard,
+      whitePlayer,
+      blackPlayer,
+    } = this.state;
+
+    const onMove = (move: string) => {
+      currentPlayer.move(move);
+      if (currentPlayer === whitePlayer)
+        this.setState({ currentPlayer: blackPlayer });
+      if (currentPlayer === blackPlayer)
+        this.setState({ currentPlayer: whitePlayer });
     };
 
     return (
       <View>
-        <TextInput
-          value={inputText}
-          style={styles.textInput}
-          onChangeText={(text) => this.setState({inputText: text})}
-        />
-        <TouchableOpacity style={styles.button} onPress={onButtonPress}>
-          <Text> Wykonaj ruch </Text>
-        </TouchableOpacity>
-        <ScrollView>
-          <Text> {gameState} </Text>
-        </ScrollView>
+        <MobileChessboard chessboard={chessboard} onMove={onMove}></MobileChessboard>
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  textInput: {
-    marginTop: 50,
-    alignSelf: 'center',
-    height: 40,
-    width: 200,
-    borderColor: 'gray',
-    borderWidth: 1,
-  },
-  button: {
-    alignItems: 'center',
-    backgroundColor: '#DDDDDD',
-    paddingHorizontal: 10,
-    padding: 10,
-    marginTop: 50,
-  },
-});
 
 export default TestGame;
