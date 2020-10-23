@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-} from 'react-native';
+import { View } from 'react-native';
 import { Subject } from 'rxjs';
 import { Game } from '../common/core/game';
 import { Chessboard } from '../common/core/chessboard';

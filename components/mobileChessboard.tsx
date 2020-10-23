@@ -1,9 +1,9 @@
 import React from 'react';
 import { useEffect, useState, FunctionComponent } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Chessboard } from '../common/core/chessboard';
-import { Square } from './square';
-import { Player } from '../common/interfaces/player';
+import { BoardInfo } from '../common/core/board-info';
+import { Piece } from '../common/pieces';
 import WhitePawn from '../images/pawn_white.svg';
 import BlackPawn from '../images/pawn_black.svg';
 import WhiteRock from '../images/rook_white.svg';
@@ -22,7 +22,10 @@ interface Props {
     onMove: (move: string) => void;
 }
 
-const charToPiece = (char: string) => {
+const getComponent = (piece: Piece) => {
+    if (piece === undefined) return null;
+
+    let char = piece.color === 'white' ? piece.symbol.toUpperCase() : piece.symbol.toLowerCase();
     switch (char) {
         case 'P':
             return <WhitePawn/>;
@@ -53,53 +56,64 @@ const charToPiece = (char: string) => {
     }
 }
 
-const generateGridItems = (positionFen: string, onPress: (x: number, y: number, piece: string) => void) => {
+const generateGridItems = (boardInfo: BoardInfo, onPress: Function) => {
     let items: any[] = [];
-    const position = positionFen.split(' ')[0];
-    const pieces = [...position];
 
-    let x = 0, y = 8;
-    pieces.forEach((piece) => {
-        let nr = Number(piece);  
-        if(!isNaN(nr)) {
-            for(let i = 0; i < nr; i++) {
-                items.push(<Square key={'blank' + x + y} component={<View/>} piece={'blank'} position={{x, y}} callback={onPress}/>);
-                x++;
-            }
-        } else if(piece === '/') {
-            x = 0; 
-            y--;
-        } else {
-            const component = charToPiece(piece);
-            if(piece == 'p' || piece == 'P') piece = '';
-            items.push(<Square key={piece + x + y} component={component} piece={piece.toUpperCase()} position={{x, y}} callback={onPress}/>);
-            x++;
+    for(let row = 8; row >= 1; row--) {
+        for(let column = 1; column <= 8; column++) {
+            let piece = boardInfo.get(row, column);
+            let svg = getComponent(piece);
+            let symbol = piece === undefined ? 'blank' : piece.getSymbol();
+            items.push(
+                <TouchableOpacity key={symbol + row + column} style={styles.square} onPress={() => onPress(piece, row, column)}>
+                    {svg}
+                </TouchableOpacity>
+            );
         }
-    });
+    }
+
     return items;
 };
 
 export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
-    const [position, setPosition] = useState(props.chessboard.positionFEN);
-    const [firstPosition, setFirstPosition] = useState({x: -1, y: -1, piece: 'blank'});
+    const [positionFEN, setPositionFEN] = useState(props.chessboard.positionFEN);
+    const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
+    const [firstPress, setFirstPress] = useState<Piece>();
 
     useEffect(() => {
-        props.chessboard.callback = () => {
-            setPosition(props.chessboard.positionFEN);
+        props.chessboard.callback = (newPosition) => {
+            setPositionFEN(newPosition);
+            setBoardInfo(new BoardInfo().fromFEN(newPosition));
         };
     });
-
-    const onPress = (x: number, y: number, piece: string) => {
-        if(firstPosition.piece === 'blank') setFirstPosition({x, y, piece});
-        else {
-            const move = firstPosition.piece + 'abcdefgh'[x] + y;
-            props.onMove(move);
-            setFirstPosition({x: -1, y: -1, piece: 'blank'});
-            // console.log(move);
+    
+    const onPress = (piece: Piece, row: number, column: number) => {
+        if (piece !== undefined && firstPress === undefined) {
+            setFirstPress(piece);
+        } else if (firstPress !== undefined) {
+            const moves = firstPress.possibleMoves(boardInfo);
+            for (let move of moves) {
+                if (move.row === row && move.column === column) {
+                    let movePGN: string = '';
+                    if (firstPress.symbol === 'p') {
+                        if ( move.type === 'capture') movePGN += 'abcdefgh'[firstPress.column - 1] + 'x';
+                    } else {
+                        movePGN += firstPress.symbol.toUpperCase();
+                        if (move.type === 'capture') movePGN += 'x';
+                    }
+                    movePGN += 'abcdefgh'[column - 1] + row;
+                    props.onMove(movePGN)
+                    break;
+                }
+            }
+            setFirstPress(undefined);
+        } else {
+            setFirstPress(undefined);
         }
     };
 
-    const items = generateGridItems(position, onPress);
+    const items = generateGridItems(boardInfo, onPress);
+
     return (
         <View style={styles.chessboard}>
             {items}
@@ -108,11 +122,18 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
 };
 
 const styles = StyleSheet.create({
-  chessboard: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignContent: 'center',
-    flexWrap: 'wrap',
-  },
+    chessboard: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignContent: 'center',
+        flexWrap: 'wrap',
+    },
+    square: {
+        height: 50,
+        width: '12.5%',
+        borderColor: 'black',
+        borderWidth: 1,
+        overflow: 'hidden',
+    },
 });
