@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEffect, useState, FunctionComponent } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, StatusBar } from 'react-native';
+import { getMinWindowSize } from '../helpers/windowSize';
 import { Chessboard } from '../common/core/chessboard';
 import { BoardInfo } from '../common/core/board-info';
 import { Piece } from '../common/pieces';
@@ -79,8 +80,10 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     const [positionFEN, setPositionFEN] = useState(props.chessboard.positionFEN);
     const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
     const [firstPress, setFirstPress] = useState<Piece>();
+    const [size, setSize] = useState(getMinWindowSize());
 
     useEffect(() => {
+        Dimensions.addEventListener('change', () => setSize(getMinWindowSize()));
         props.chessboard.callback = (newPosition) => {
             setPositionFEN(newPosition);
             setBoardInfo(new BoardInfo().fromFEN(newPosition));
@@ -115,8 +118,13 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     const items = generateGridItems(boardInfo, onPress);
 
     return (
-        <View style={styles.chessboard}>
-            {items}
+        <View style={{width: size, height: size, overflow: 'hidden'}}>
+            <StatusBar hidden/>
+            <ImageBackground resizeMode='contain' source={require('../images/chessboard.png')} style={{flex: 1}}>
+                <View style={styles.chessboard}>
+                    {items}
+                </View>
+            </ImageBackground>
         </View>
     );
 };
@@ -127,13 +135,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignContent: 'center',
+        alignSelf: 'center',
         flexWrap: 'wrap',
     },
     square: {
-        height: 50,
-        width: '12.5%',
-        borderColor: 'black',
-        borderWidth: 1,
+        height: '11.6%',
+        width: '11.6%',
         overflow: 'hidden',
     },
 });
