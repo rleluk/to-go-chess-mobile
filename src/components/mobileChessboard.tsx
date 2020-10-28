@@ -1,10 +1,10 @@
 import React from 'react';
 import { useEffect, useState, FunctionComponent } from 'react';
-import { View, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, StatusBar } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import { getMinWindowSize } from '../helpers/windowSize';
 import { Chessboard } from '../common/core/chessboard';
 import { BoardInfo } from '../common/core/board-info';
-import { Piece } from '../common/pieces';
+import { Piece, Move } from '../common/pieces';
 import WhitePawn from '../images/pawn_white.svg';
 import BlackPawn from '../images/pawn_black.svg';
 import WhiteRock from '../images/rook_white.svg';
@@ -21,6 +21,14 @@ import BlackQueen from '../images/queen_black.svg';
 interface Props {
     chessboard: Chessboard;
     onMove: (move: string) => void;
+}
+
+interface LastMove {
+    previousPosition: {
+        row: number, 
+        column: number
+    }, 
+    move: Move
 }
 
 const getComponent = (piece: Piece) => {
@@ -57,7 +65,7 @@ const getComponent = (piece: Piece) => {
     }
 }
 
-const generateGridItems = (boardInfo: BoardInfo, onPress: Function) => {
+const generateGridItems = (boardInfo: BoardInfo, onPress: Function, firstPress: Piece | undefined, lastMove: LastMove | undefined) => {
     let items: any[] = [];
 
     for(let row = 8; row >= 1; row--) {
@@ -65,8 +73,16 @@ const generateGridItems = (boardInfo: BoardInfo, onPress: Function) => {
             let piece = boardInfo.get(row, column);
             let svg = getComponent(piece);
             let symbol = piece === undefined ? 'blank' : piece.getSymbol();
+            
+            const style = firstPress !== undefined && firstPress === piece ? 
+                styles.highlightedPiece : (
+                    lastMove !== undefined && (lastMove.move.row === row && lastMove.move.column === column || 
+                    lastMove.previousPosition.row === row && lastMove.previousPosition.column === column) ? 
+                    styles.highlightedSquare : styles.square
+                )
+
             items.push(
-                <TouchableOpacity key={symbol + row + column} style={styles.square} onPress={() => onPress(piece, row, column)}>
+                <TouchableOpacity activeOpacity={1} key={symbol + row + column} style={style} onPress={() => onPress(piece, row, column)}>
                     {svg}
                 </TouchableOpacity>
             );
@@ -80,6 +96,7 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     const [positionFEN, setPositionFEN] = useState(props.chessboard.positionFEN);
     const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
     const [firstPress, setFirstPress] = useState<Piece>();
+    const [lastMove, setLastMove] = useState<LastMove>();
     const [size, setSize] = useState(getMinWindowSize());
 
     useEffect(() => {
@@ -91,35 +108,39 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     });
     
     const onPress = (piece: Piece, row: number, column: number) => {
-        if (piece !== undefined && firstPress === undefined) {
+        if (piece !== undefined && firstPress === undefined && boardInfo.turn == piece.color) {
             setFirstPress(piece);
         } else if (firstPress !== undefined) {
-            const moves = firstPress.possibleMoves(boardInfo);
-            for (let move of moves) {
-                if (move.row === row && move.column === column) {
-                    let movePGN: string = '';
-                    if (firstPress.symbol === 'p') {
-                        if ( move.type === 'capture') movePGN += 'abcdefgh'[firstPress.column - 1] + 'x';
-                    } else {
-                        movePGN += firstPress.symbol.toUpperCase();
-                        if (move.type === 'capture') movePGN += 'x';
+            if (firstPress === piece) {
+                setFirstPress(undefined);
+            } else {
+                const moves = firstPress.possibleMoves(boardInfo);
+                for (let move of moves) {
+                    if (move.row === row && move.column === column) {
+                        let movePGN: string = '';
+                        if (firstPress.symbol === 'p') {
+                            if ( move.type === 'capture') movePGN += 'abcdefgh'[firstPress.column - 1] + 'x';
+                        } else {
+                            movePGN += firstPress.symbol.toUpperCase();
+                            if (move.type === 'capture') movePGN += 'x';
+                        }
+                        movePGN += 'abcdefgh'[column - 1] + row;
+                        props.onMove(movePGN)
+                        setFirstPress(undefined);
+                        setLastMove({previousPosition: {row: firstPress.row, column: firstPress.column}, move});
+                        break;
                     }
-                    movePGN += 'abcdefgh'[column - 1] + row;
-                    props.onMove(movePGN)
-                    break;
                 }
             }
-            setFirstPress(undefined);
         } else {
             setFirstPress(undefined);
         }
     };
 
-    const items = generateGridItems(boardInfo, onPress);
+    const items = generateGridItems(boardInfo, onPress, firstPress, lastMove);
 
     return (
         <View style={{width: size, height: size, overflow: 'hidden'}}>
-            <StatusBar hidden/>
             <ImageBackground resizeMode='contain' source={require('../images/chessboard.png')} style={{flex: 1}}>
                 <View style={styles.chessboard}>
                     {items}
@@ -139,8 +160,17 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
     },
     square: {
-        height: '11.6%',
-        width: '11.6%',
-        overflow: 'hidden',
+        height: '11.7%',
+        width: '11.7%',
     },
+    highlightedPiece: {
+        height: '11.7%',
+        width: '11.7%',
+        backgroundColor: 'rgba(18, 66, 17, 0.6)'
+    },
+    highlightedSquare: {
+        height: '11.7%',
+        width: '11.7%',
+        backgroundColor: 'rgba(161, 148, 10, 0.6)'
+    }
 });

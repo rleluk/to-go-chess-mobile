@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StatusBar } from 'react-native';
 import { Subject } from 'rxjs';
 import { Game } from '../common/core/game';
 import { Chessboard } from '../common/core/chessboard';
@@ -7,23 +7,23 @@ import { Player } from '../common/interfaces/player';
 import { MobileChessboard } from './mobileChessboard';
 
 class ChessPlayer implements Player {
-  color: 'white' | 'black';
-  emitMove: Subject<string> = new Subject<string>();
+    color: 'white' | 'black';
+    emitMove: Subject<string> = new Subject<string>();
 
-  move(move: string) {
-    this.emitMove.next(move);
-  }
+    move(move: string) {
+        this.emitMove.next(move);
+    }
 
-  receiveMove(move: string) {
-    console.log(this.color + ' player received: ' + move);
-  }
+    receiveMove(move: string) {
+        console.log(this.color + ' player received: ' + move);
+    }
 }
 
 interface State {
-  currentPlayer: ChessPlayer;
-  whitePlayer: ChessPlayer;
-  blackPlayer: ChessPlayer;
-  chessboard: Chessboard;
+    currentPlayer: ChessPlayer;
+    whitePlayer: ChessPlayer;
+    blackPlayer: ChessPlayer;
+    chessboard: Chessboard;
 }
 
 interface Props {}
@@ -38,20 +38,15 @@ class TestGame extends React.Component<Props, State> {
     game.init({ canvas: chessboard, whitePlayer: wp, blackPlayer: bp });
 
     this.state = {
-      currentPlayer: wp,
-      whitePlayer: wp,
-      blackPlayer: bp,
-      chessboard: chessboard,
+        currentPlayer: wp,
+        whitePlayer: wp,
+        blackPlayer: bp,
+        chessboard: chessboard,
     };
   }
 
   render() {
-    const {
-      currentPlayer,
-      chessboard,
-      whitePlayer,
-      blackPlayer,
-    } = this.state;
+    const { currentPlayer, chessboard, whitePlayer, blackPlayer } = this.state;
 
     const onMove = (move: string) => {
       currentPlayer.move(move);
@@ -62,9 +57,10 @@ class TestGame extends React.Component<Props, State> {
     };
 
     return (
-      <View>
-        <MobileChessboard chessboard={chessboard} onMove={onMove}></MobileChessboard>
-      </View>
+         <View>
+            <StatusBar hidden />
+            <MobileChessboard chessboard={chessboard} onMove={onMove}></MobileChessboard>
+        </View>
     );
   }
 }
