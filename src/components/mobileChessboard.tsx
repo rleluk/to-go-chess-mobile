@@ -3,8 +3,9 @@ import { useEffect, useState, FunctionComponent } from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import { Chessboard } from '../common/core/chessboard';
 import { BoardInfo } from '../common/core/board-info';
-import { Piece, Move } from '../common/pieces';
-import { getComponent } from '../helpers/getComponent';
+import { Piece } from '../common/pieces/piece';
+import { Move } from '../common/pieces/move'
+import { getComponent } from '../helpers/get-component';
 
 
 interface Props {
@@ -46,8 +47,7 @@ const generateGridItems = (boardInfo: BoardInfo, onPress: Function, firstPress: 
                 style = styles.highlightedPossibleMove;
             } else if (moves !== undefined && moves.length > 0) {
                 style = moves[0].type === 'capture' ? styles.highlightedPossibleCapture : styles.highlightedPossibleMove;
-            }
-            else if (lastMove !== undefined && (lastMove.move.row === row && lastMove.move.column === column || 
+            } else if (lastMove !== undefined && (lastMove.move.row === row && lastMove.move.column === column || 
                 lastMove.previousPosition.row === row && lastMove.previousPosition.column === column)) {
                 style = styles.highlightedLastMove;
             } 
@@ -80,37 +80,41 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     });
     
     const onPress = (piece: Piece, row: number, column: number) => {
-        if (piece !== undefined && firstPress === undefined && boardInfo.turn == piece.color) {
+        if (piece === firstPress?.piece) {
+            setFirstPress(undefined);
+        } else if (piece !== undefined && boardInfo.turn == piece.color) {
             setFirstPress({
                 piece, 
                 possibleMoves: piece.possibleMoves(boardInfo)
             });
         } else if (firstPress !== undefined) {
-            if (firstPress.piece === piece) {
-                setFirstPress(undefined);
-            } 
-            else {
-                for (let move of firstPress.possibleMoves) {
-                    if (move.row === row && move.column === column) {
-                        let movePGN: string = '';
-                        if (firstPress.piece.symbol === 'p') {
-                            if (move.type === 'capture') movePGN += 'abcdefgh'[firstPress.piece.column - 1] + 'x';
-                        } else {
-                            movePGN += firstPress.piece.symbol.toUpperCase();
-                            if (move.type === 'capture') movePGN += 'x';
-                        }
+            for (let move of firstPress.possibleMoves) {
+                if (move.row === row && move.column === column) {
+                    let movePGN: string = '';
+                    if (firstPress.piece.symbol === 'p') {
+                        if (move.type === 'capture') movePGN += 'abcdefgh'[firstPress.piece.column - 1] + 'x';
                         movePGN += 'abcdefgh'[column - 1] + row;
-                        props.onMove(movePGN)
-                        setFirstPress(undefined);
-                        setLastMove({
-                            previousPosition: {
-                                row: firstPress.piece.row, 
-                                column: firstPress.piece.column
-                            }, 
-                            move
-                        });
-                        break;
-                    }
+                        if (row === 8 && boardInfo.turn === 'white') movePGN += '=Q';
+                        if (row === 1 && boardInfo.turn === 'black') movePGN += '=Q';
+                    } else if (firstPress.piece.symbol === 'k' && move.type === 'kingsideCastle') {
+                        movePGN += 'O-O';
+                    } else if (firstPress.piece.symbol === 'k' && move.type === 'queensideCastle') {
+                        movePGN += 'O-O-O';
+                    } else {
+                        movePGN += firstPress.piece.symbol.toUpperCase();
+                        if (move.type === 'capture') movePGN += 'x';
+                        movePGN += 'abcdefgh'[column - 1] + row;
+                    } 
+                    props.onMove(movePGN)
+                    setFirstPress(undefined);
+                    setLastMove({
+                        previousPosition: {
+                            row: firstPress.piece.row, 
+                            column: firstPress.piece.column
+                        }, 
+                        move
+                    });
+                    break;
                 }
             }
         } 

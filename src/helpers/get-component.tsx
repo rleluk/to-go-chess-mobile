@@ -11,7 +11,7 @@ import WhiteKing from '../images/king_white.svg';
 import BlackKing from '../images/king_black.svg';
 import WhiteQueen from '../images/queen_white.svg';
 import BlackQueen from '../images/queen_black.svg';
-import { Piece } from '../common/pieces';
+import { Piece } from '../common/pieces/piece';
 
 export const getComponent = (piece: Piece) => {
     if (piece === undefined) return null;
