@@ -6,7 +6,7 @@ import { BoardInfo } from '../common/core/board-info';
 import { Piece } from '../common/pieces/piece';
 import { Move } from '../common/pieces/move'
 import { getComponent } from '../helpers/get-component';
-
+import { PromotionDialog } from './promotionDialog';
 
 interface Props {
     chessboard: Chessboard;
@@ -70,6 +70,8 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     const [firstPress, setFirstPress] = useState<FirstPress>();
     const [lastMove, setLastMove] = useState<LastMove>();
     const [size, setSize] = useState(getMinWindowSize());
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [modalCallback, setModalCallback] = useState(() => (symbol: string) => {});
 
     useEffect(() => {
         Dimensions.addEventListener('change', () => setSize(getMinWindowSize()));
@@ -88,50 +90,62 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
                 possibleMoves: piece.possibleMoves(boardInfo)
             });
         } else if (firstPress !== undefined) {
-            for (let move of firstPress.possibleMoves) {
-                if (move.row === row && move.column === column) {
-                    let movePGN: string = '';
-                    if (firstPress.piece.symbol === 'p') {
-                        if (move.type === 'capture') movePGN += 'abcdefgh'[firstPress.piece.column - 1] + 'x';
-                        movePGN += 'abcdefgh'[column - 1] + row;
-                        if (row === 8 && boardInfo.turn === 'white') movePGN += '=Q';
-                        if (row === 1 && boardInfo.turn === 'black') movePGN += '=Q';
-                    } else if (firstPress.piece.symbol === 'k' && move.type === 'kingsideCastle') {
-                        movePGN += 'O-O';
-                    } else if (firstPress.piece.symbol === 'k' && move.type === 'queensideCastle') {
-                        movePGN += 'O-O-O';
-                    } else {
-                        movePGN += firstPress.piece.symbol.toUpperCase();
-                        if (move.type === 'capture') movePGN += 'x';
-                        let samePieces = boardInfo.find(firstPress.piece.symbol, boardInfo.turn).filter(piece => {
-                            return piece.checkMove(boardInfo, row, column, move.type);
+            let move = firstPress.possibleMoves.filter(move => move.column === column && move.row === row)[0];
+            if (move === undefined) return;
+            let movePGN: string = '';
+            if (firstPress.piece.symbol === 'p') {
+                if (move.type === 'capture') movePGN += 'abcdefgh'[firstPress.piece.column - 1] + 'x';
+                movePGN += 'abcdefgh'[column - 1] + row;
+                if (row === 8 && boardInfo.turn === 'white' || row === 1 && boardInfo.turn === 'black') {
+                    setModalCallback(() => (symbol:string) => {
+                        movePGN += `=${symbol}`;
+                        props.onMove(movePGN);
+                        setFirstPress(undefined);
+                        setLastMove({
+                            previousPosition: {
+                                row: firstPress.piece.row, 
+                                column: firstPress.piece.column
+                            }, 
+                            move
                         });
-                        let toAdd = '';
-                        samePieces = samePieces.filter(piece => !(piece.column === firstPress.piece.column && piece.row == firstPress.piece.row));
-                        if (samePieces.some(piece => piece.row === firstPress.piece.row)) {
-                            toAdd += 'abcdefgh'[firstPress.piece.column - 1];
-                        } 
-                        if (samePieces.some(piece => piece.column === firstPress.piece.column)) {
-                            toAdd += firstPress.piece.row;
-                        } 
-                        if (toAdd.length === 0 && samePieces.length !== 0) {
-                            toAdd += 'abcdefgh'[firstPress.piece.column - 1];
-                        }
-                        movePGN += toAdd;
-                        movePGN += 'abcdefgh'[column - 1] + row;
-                    } 
-                    props.onMove(movePGN)
-                    setFirstPress(undefined);
-                    setLastMove({
-                        previousPosition: {
-                            row: firstPress.piece.row, 
-                            column: firstPress.piece.column
-                        }, 
-                        move
+                        setIsModalVisible(false);
                     });
-                    break;
+                    setIsModalVisible(true);
+                    return;
                 }
-            }
+            } else if (firstPress.piece.symbol === 'k' && move.type === 'kingsideCastle') {
+                movePGN += 'O-O';
+            } else if (firstPress.piece.symbol === 'k' && move.type === 'queensideCastle') {
+                movePGN += 'O-O-O';
+            } else {
+                movePGN += firstPress.piece.symbol.toUpperCase();
+                if (move.type === 'capture') movePGN += 'x';
+                let samePieces = boardInfo.find(firstPress.piece.symbol, boardInfo.turn).filter(piece => {
+                    return piece.checkMove(boardInfo, row, column, move.type);
+                });
+                let toAdd = '';
+                samePieces = samePieces.filter(piece => !(piece.column === firstPress.piece.column && piece.row == firstPress.piece.row));
+                if (samePieces.some(piece => piece.row === firstPress.piece.row)) {
+                    toAdd += 'abcdefgh'[firstPress.piece.column - 1];
+                } 
+                if (samePieces.some(piece => piece.column === firstPress.piece.column)) {
+                    toAdd += firstPress.piece.row;
+                } 
+                if (toAdd.length === 0 && samePieces.length !== 0) {
+                    toAdd += 'abcdefgh'[firstPress.piece.column - 1];
+                }
+                movePGN += toAdd;
+                movePGN += 'abcdefgh'[column - 1] + row;
+            } 
+            props.onMove(movePGN)
+            setFirstPress(undefined);
+            setLastMove({
+                previousPosition: {
+                    row: firstPress.piece.row, 
+                    column: firstPress.piece.column
+                }, 
+                move
+            });
         } 
     };
 
@@ -139,6 +153,7 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
 
     return (
         <View style={{width: size, height: size, overflow: 'hidden'}}>
+            <PromotionDialog color={boardInfo.turn} isVisible={isModalVisible} modalCallback={modalCallback}/>
             <ImageBackground resizeMode='contain' source={require('../images/chessboard.png')} style={{flex: 1}}>
                 <View style={styles.chessboard}>
                     {items}
