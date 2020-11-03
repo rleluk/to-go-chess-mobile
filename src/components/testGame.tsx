@@ -35,7 +35,7 @@ class TestGame extends React.Component<Props, State> {
     let chessboard = new Chessboard();
     let wp = new ChessPlayer();
     let bp = new ChessPlayer();
-    game.init({ canvas: chessboard, whitePlayer: wp, blackPlayer: bp });
+    game.init({ canvas: chessboard, whitePlayer: wp, blackPlayer: bp});
 
     this.state = {
         currentPlayer: wp,
@@ -49,6 +49,7 @@ class TestGame extends React.Component<Props, State> {
     const { currentPlayer, chessboard, whitePlayer, blackPlayer } = this.state;
 
     const onMove = (move: string) => {
+      console.log(move)
       currentPlayer.move(move);
       if (currentPlayer === whitePlayer)
         this.setState({ currentPlayer: blackPlayer });
