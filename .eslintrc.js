@@ -4,7 +4,7 @@ module.exports = {
   rules: {
     'prettier/prettier': 0,
     'react/react-in-jsx-scope': 'off',
-    'curly': 'all',
+    'curly': '2',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
   },

@@ -1,4 +1,4 @@
-package com.mobile_app;
+package com.togochess;
 
 import com.facebook.react.ReactActivity;
 
@@ -9,7 +9,5 @@ public class MainActivity extends ReactActivity {
    * rendering of the component.
    */
   @Override
-  protected String getMainComponentName() {
-    return "mobile_app";
-  }
+  protected String getMainComponentName() { return "ToGoChess"; }
 }
