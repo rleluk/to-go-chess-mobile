@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-               BuildableName = "mobile_app-tvOS.app"
-               BlueprintName = "mobile_app-tvOS"
-               ReferencedContainer = "container:mobile_app.xcodeproj">
+               BuildableName = "togochess-tvOS.app"
+               BlueprintName = "togochess-tvOS"
+               ReferencedContainer = "container:togochess.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D02E48F1E0B4A5D006451C7"
-               BuildableName = "mobile_app-tvOSTests.xctest"
-               BlueprintName = "mobile_app-tvOSTests"
-               ReferencedContainer = "container:mobile_app.xcodeproj">
+               BuildableName = "togochess-tvOSTests.xctest"
+               BlueprintName = "togochess-tvOSTests"
+               ReferencedContainer = "container:togochess.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-            BuildableName = "mobile_app-tvOS.app"
-            BlueprintName = "mobile_app-tvOS"
-            ReferencedContainer = "container:mobile_app.xcodeproj">
+            BuildableName = "togochess-tvOS.app"
+            BlueprintName = "togochess-tvOS"
+            ReferencedContainer = "container:togochess.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-            BuildableName = "mobile_app-tvOS.app"
-            BlueprintName = "mobile_app-tvOS"
-            ReferencedContainer = "container:mobile_app.xcodeproj">
+            BuildableName = "togochess-tvOS.app"
+            BlueprintName = "togochess-tvOS"
+            ReferencedContainer = "container:togochess.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

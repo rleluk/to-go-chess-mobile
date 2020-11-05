@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "100252322773",
+    "firebase_url": "https://togochess-833a5.firebaseio.com",
+    "project_id": "togochess-833a5",
+    "storage_bucket": "togochess-833a5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:100252322773:android:e50a2626b2cf8ea3038b5c",
+        "android_client_info": {
+          "package_name": "com.togochess"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "100252322773-nu25art5lbq3ntje422simn0fpnfhhv0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.togochess",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "100252322773-tnpp8tpktgrn0lt6p78igljhffcqgp1s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfcBVMbBnOa9oLI_PmmNyY0Xw3QWRVrns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "100252322773-tnpp8tpktgrn0lt6p78igljhffcqgp1s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
