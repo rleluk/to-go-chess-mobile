@@ -119,7 +119,6 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
                 movePGN += 'O-O-O';
             } else {
                 movePGN += firstPress.piece.symbol.toUpperCase();
-                if (move.type === 'capture') movePGN += 'x';
                 let samePieces = boardInfo.find(firstPress.piece.symbol, boardInfo.turn).filter(piece => {
                     return piece.checkMove(boardInfo, row, column, move.type);
                 });
@@ -134,6 +133,7 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
                 if (toAdd.length === 0 && samePieces.length !== 0) {
                     toAdd += 'abcdefgh'[firstPress.piece.column - 1];
                 }
+                if (move.type === 'capture') toAdd += 'x';
                 movePGN += toAdd;
                 movePGN += 'abcdefgh'[column - 1] + row;
             } 

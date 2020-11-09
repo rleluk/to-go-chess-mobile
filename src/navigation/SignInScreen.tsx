@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
-import TestGame from "../components/testGame";
-import {Text, Button, StyleSheet, View, TextInput} from "react-native";
+import {Button, TextInput} from "react-native";
 import auth from "@react-native-firebase/auth";
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import { GoogleSignin } from '@react-native-community/google-signin';

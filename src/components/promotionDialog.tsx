@@ -12,7 +12,7 @@ interface Props {
 
 
 const generateItems = (color: 'white' | 'black', setIsVisible: (visible: boolean) => void, modalCallback: (symbol: string) => void) => {
-    let symbols = color === 'black' ? ['q', 'r', 'b', 'k'] : ['Q', 'R', 'B', 'K'];
+    let symbols = color === 'black' ? ['q', 'r', 'b', 'n'] : ['Q', 'R', 'B', 'N'];
     let items: any[] = [];
 
     symbols.forEach(symbol => {
