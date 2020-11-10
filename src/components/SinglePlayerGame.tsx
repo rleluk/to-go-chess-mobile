@@ -31,10 +31,12 @@ interface State {
     moveIterator: number;
 }
 
-interface Props {}
+interface Props {
+  navigation: any;
+}
 
 class SinglePlayerGame extends React.Component<Props, State> {
-  constructor(props: Props) {
+  constructor(props: any) {
     super(props);
     let game = new Game();
     let chessboard = new Chessboard();
@@ -94,7 +96,7 @@ class SinglePlayerGame extends React.Component<Props, State> {
             <MobileChessboard style={{ height: size, width: size }} chessboard={chessboard} onMove={onMove}></MobileChessboard>
 
             <ImageBackground resizeMode='contain' source={require('../images/bottom_buttons.png')} style={{ height: 0.17 * remainingSpace, width: size, ...styles.buttonContainer }}>
-              <TouchableOpacity style={styles.button} onPress={() => console.log("Menu button pressed.")}/>
+              <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.openDrawer()}/>
               <TouchableOpacity style={styles.button} onPress={() => console.log("Go move back button pressed.")}/>
               <TouchableOpacity style={styles.button} onPress={() => console.log("Go move next button pressed.")}/>
               <TouchableOpacity style={styles.button} onPress={() => console.log("Refresh button pressed.")}/>

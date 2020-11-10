@@ -10,7 +10,7 @@ const HomeScreen = ({navigation}: any) => {
             <StatusBar hidden />
             {/* <UserBar navigation={navigation} /> */}
             <View style={styles.container}>
-                <SinglePlayerGame/>
+                <SinglePlayerGame navigation={navigation}/>
             </View>
         </>
     );

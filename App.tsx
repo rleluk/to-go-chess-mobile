@@ -7,7 +7,9 @@ import thunk from 'redux-thunk';
 
 import HomeScreen from './src/navigation/HomeScreen'
 import {NavigationContainer} from "@react-navigation/native";
-import { createStackNavigator } from '@react-navigation/stack'
+import {createStackNavigator} from '@react-navigation/stack';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import DrawerContent from './src/navigation/DrawerContent';
 import SignUpScreen from "./src/navigation/SignUpScreen";
 import SignInScreen from "./src/navigation/SignInScreen";
 
@@ -18,7 +20,7 @@ import auth from "@react-native-firebase/auth";
 import SplashScreen from "./src/navigation/SplashScreen";
 const store = createStore(reducer, applyMiddleware(thunk));
 
-const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
 function App(props: any) {
 
@@ -34,20 +36,23 @@ function App(props: any) {
 
     return (
       <NavigationContainer>
-        <Stack.Navigator>
+        <Drawer.Navigator 
+            drawerStyle={{  backgroundColor: '#f2f6e7', opacity: 0.9 }}
+            drawerContent={props => <DrawerContent {...props}/>}
+        >
             {props.isLoading ? (
-                <Stack.Screen
+                <Drawer.Screen
                     name="Splash"
                     component={SplashScreen}
                     options={{headerShown: false}}
                 />) :(
                 <>
-                    <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
-                    <Stack.Screen name="Sign up" component={SignUpScreen} />
-                    <Stack.Screen name="Sign in" component={SignInScreen} />
+                    <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
+                    <Drawer.Screen name="Sign up" component={SignUpScreen} />
+                    <Drawer.Screen name="Sign in" component={SignInScreen} />
                 </>)
             }
-        </Stack.Navigator>
+        </Drawer.Navigator>
       </NavigationContainer>
   );
 }
