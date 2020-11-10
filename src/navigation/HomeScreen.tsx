@@ -1,15 +1,16 @@
 import React from 'react';
-import TestGame from "../components/testGame";
-import {Button, StyleSheet, View} from "react-native";
+import SinglePlayerGame from "../components/SinglePlayerGame";
+import {StyleSheet, View, StatusBar} from "react-native";
 import UserBar from "../components/UserBar";
 
 
 const HomeScreen = ({navigation}: any) => {
     return (
         <>
-            <UserBar navigation={navigation} />
+            <StatusBar hidden />
+            {/* <UserBar navigation={navigation} /> */}
             <View style={styles.container}>
-                <TestGame/>
+                <SinglePlayerGame/>
             </View>
         </>
     );
