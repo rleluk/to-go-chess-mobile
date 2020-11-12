@@ -6,11 +6,13 @@ import { BoardInfo } from '../common/core/board-info';
 import { Piece } from '../common/pieces/piece';
 import { Move } from '../common/pieces/move'
 import { getComponent } from '../helpers/get-component';
-import { PromotionDialog } from './promotionDialog';
+import { PromotionDialog } from './PromotionDialog';
+
 
 interface Props {
     chessboard: Chessboard;
     onMove: (move: string) => void;
+    style: any;
 }
 
 
@@ -27,9 +29,6 @@ interface FirstPress {
     piece: Piece;
     possibleMoves: Move[];
 }
-
-
-export const getMinWindowSize = (): number => Math.min(Dimensions.get('window').width, Dimensions.get('window').height);
 
 
 const generateGridItems = (boardInfo: BoardInfo, onPress: Function, firstPress: FirstPress | undefined, lastMove: LastMove | undefined) => {
@@ -69,12 +68,10 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
     const [firstPress, setFirstPress] = useState<FirstPress>();
     const [lastMove, setLastMove] = useState<LastMove>();
-    const [size, setSize] = useState(getMinWindowSize());
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalCallback, setModalCallback] = useState(() => (symbol: string) => {});
 
     useEffect(() => {
-        Dimensions.addEventListener('change', () => setSize(getMinWindowSize()));
         props.chessboard.callback = (newPosition) => {
             setPositionFEN(newPosition);
             setBoardInfo(new BoardInfo().fromFEN(newPosition));
@@ -152,7 +149,7 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     const items = generateGridItems(boardInfo, onPress, firstPress, lastMove);
 
     return (
-        <View style={{width: size, height: size, overflow: 'hidden'}}>
+        <View style={props.style}>
             <PromotionDialog color={boardInfo.turn} isVisible={isModalVisible} modalCallback={modalCallback}/>
             <ImageBackground resizeMode='contain' source={require('../images/chessboard.png')} style={{flex: 1}}>
                 <View style={styles.chessboard}>
