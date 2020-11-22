@@ -35,6 +35,30 @@ const app = (state = initialApp, action: any) => {
                 isLoading: array.length > 0,
                 stackLoading: array,
             };
+        case 'OPEN_DIALOG':
+            return {
+                ...state,
+                dialog: {
+                    content: action.content,
+                    onClose: action.onClose,
+                },
+            }
+        case 'CLOSE_DIALOG':
+            return {
+                ...state,
+                dialog: {},
+            }
+        case 'NEW_GAME':
+            return {
+                ...state,
+                config: action.config,
+                newGame: true,
+            }
+        case 'GAME_CREATED':
+            return {
+                ...state,
+                newGame: false,
+            }
         default:
             return state;
     }

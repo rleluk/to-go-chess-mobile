@@ -18,6 +18,7 @@ import {restoreUser} from "./src/actions";
 import reducer from './src/reducers';
 import auth from "@react-native-firebase/auth";
 import SplashScreen from "./src/navigation/SplashScreen";
+import Dialog from "./src/components/Dialog"
 const store = createStore(reducer, applyMiddleware(thunk));
 
 const Drawer = createDrawerNavigator();
@@ -36,6 +37,7 @@ function App(props: any) {
 
     return (
       <NavigationContainer>
+      <Dialog />
         <Drawer.Navigator 
             drawerStyle={{  backgroundColor: '#f2f6e7', opacity: 0.9 }}
             drawerContent={props => <DrawerContent {...props}/>}

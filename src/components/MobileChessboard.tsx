@@ -7,12 +7,15 @@ import { Piece } from '../common/pieces/piece';
 import { Move } from '../common/pieces/move'
 import { getComponent } from '../helpers/get-component';
 import { PromotionDialog } from './PromotionDialog';
+import {Subject} from "rxjs";
 
 
 interface Props {
     chessboard: Chessboard;
     onMove: (move: string) => void;
     style: any;
+    turn: string;
+    clearBoard: Subject<void>;
 }
 
 
@@ -20,7 +23,7 @@ interface LastMove {
     previousPosition: {
         row: number, 
         column: number
-    }, 
+    },
     move: Move
 }
 
@@ -77,11 +80,19 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
             setBoardInfo(new BoardInfo().fromFEN(newPosition));
         };
     });
+
+    useEffect(() => {
+        props.clearBoard.subscribe(() => {
+            setFirstPress(undefined);
+            setLastMove(undefined);
+        });
+        return props.clearBoard.unsubscribe;
+    }, []);
     
     const onPress = (piece: Piece, row: number, column: number) => {
         if (piece === firstPress?.piece) {
             setFirstPress(undefined);
-        } else if (piece !== undefined && boardInfo.turn == piece.color) {
+        } else if (piece !== undefined && props.turn == piece.color && boardInfo.turn === piece.color) {
             setFirstPress({
                 piece, 
                 possibleMoves: piece.possibleMoves(boardInfo)

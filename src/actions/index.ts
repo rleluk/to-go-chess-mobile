@@ -12,3 +12,22 @@ export const loaded = (message: string) => ({
     type: 'LOADED',
     message,
 });
+
+export const openDialog = (content: any, onClose?: any) => ({
+    type: 'OPEN_DIALOG',
+    content,
+    onClose,
+});
+
+export const closeDialog = () => ({
+    type: 'CLOSE_DIALOG',
+});
+
+export const createGame = (config: any) => ({
+    type: 'NEW_GAME',
+    config
+});
+
+export const gameCreated = () => ({
+    type: 'GAME_CREATED',
+});

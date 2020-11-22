@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import {View, StyleSheet, Text, Button, TouchableOpacity} from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import {
   Avatar,
@@ -14,8 +14,11 @@ import IonIcon from 'react-native-vector-icons/Ionicons';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {bindActionCreators} from "redux";
+import {closeDialog, createGame, gameCreated, openDialog} from "../actions";
+import {getComponent, getComponentBySymbol} from '../helpers/get-component';
 
-const DrawerContent = ({navigation, user}: any) => {
+const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView>
@@ -79,7 +82,41 @@ const DrawerContent = ({navigation, user}: any) => {
                     />
                 )}
                 label="Gra online"
-                onPress={() => {}}
+                onPress={ () => {
+                  openDialog(
+                      <View>
+                        <Text style={{textAlign: 'center'}}>Wybierz kolor</Text>
+                        <View style={styles.piecesBar}>
+                          <TouchableOpacity style={styles.piece} onPress={() => {
+                            closeDialog();
+                            createGame({mode: 'onlineGame', color: 'white'})
+                            navigation.navigate('Home');
+                          }} >{ getComponentBySymbol('K') }</TouchableOpacity>
+                          <TouchableOpacity style={styles.doublePiece} onPress={() => {
+                            closeDialog();
+                            createGame({mode: 'onlineGame', color: 'random'})
+                            navigation.navigate('Home');
+                          }} >
+                            <View style={styles.halfPiece}>
+                              <View style={styles.piece}>
+                                { getComponentBySymbol('K') }
+                              </View>
+                            </View>
+                            <View style={styles.halfPiece}>
+                              <View style={styles.halfBlackPiece}>
+                                { getComponentBySymbol('k') }
+                              </View>
+                            </View>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.piece} onPress={() => {
+                            closeDialog();
+                            createGame({mode: 'onlineGame', color: 'black'})
+                            navigation.navigate('Home');
+                          }} >{ getComponentBySymbol('k') }</TouchableOpacity>
+                        </View>
+                      </View>
+                  );
+                }}
               />
               <DrawerItem 
                 style={styles.newGameOptions}
@@ -92,6 +129,7 @@ const DrawerContent = ({navigation, user}: any) => {
                 )}
                 label="Dwoje graczy"
                 onPress={ () => {
+                  createGame({mode: 'twoPlayers'});
                   navigation.navigate('Home');
                 }}
               />
@@ -162,6 +200,29 @@ const DrawerContent = ({navigation, user}: any) => {
 };
 
 const styles = StyleSheet.create({
+  piecesBar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  piece: {
+    width: 46,
+    height: 46,
+  },
+  halfPiece: {
+    width: 23,
+    height: 46,
+    overflow: "hidden",
+  },
+  halfBlackPiece: {
+    width: 46,
+    height: 46,
+    left: -23,
+  },
+  doublePiece: {
+    width: 46,
+    height: 46,
+    flexDirection: 'row',
+  },
   drawerContent: {
     flex: 1,
   },
@@ -223,6 +284,14 @@ const mapStateToProps = (state: any) => {
 };
 
 const mapDispatchToProps = (dispatch: any) => ({
+  ...bindActionCreators(
+      {
+        createGame,
+        gameCreated,
+        openDialog,
+      },
+      dispatch,
+  ),
 });
 
 const DrawerContentContainer = connect(

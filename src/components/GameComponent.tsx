@@ -1,11 +1,26 @@
 import React from 'react';
-import { View, StatusBar, StyleSheet, Dimensions, Text, ImageBackground, ScrollView, TouchableOpacity } from 'react-native';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux';
+import {
+    View,
+    StatusBar,
+    StyleSheet,
+    Dimensions,
+    Text,
+    ImageBackground,
+    ScrollView,
+    TouchableOpacity,
+    Button
+} from 'react-native';
 import { Subject } from 'rxjs';
 import { Game } from '../common/core/game';
 import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
 import { MobileChessboard } from './MobileChessboard';
 import { getMinWindowSize, getMaxWindowSize, getOrientation } from '../helpers/screen-info';
+import {closeDialog, gameCreated, openDialog} from "../actions";
+import {SocketPlayer} from "../common/core/socket-player";
+import {ChessButton} from "./ChessButton";
 
 class ChessPlayer implements Player {
     color: 'white' | 'black';
@@ -21,9 +36,9 @@ class ChessPlayer implements Player {
 }
 
 interface State {
-    currentPlayer: ChessPlayer;
-    whitePlayer: ChessPlayer;
-    blackPlayer: ChessPlayer;
+    currentPlayer: ChessPlayer | null;
+    whitePlayer: ChessPlayer | null;
+    blackPlayer: ChessPlayer | null;
     chessboard: Chessboard;
     size: number;
     moves: (Text | Element)[];
@@ -32,22 +47,29 @@ interface State {
 }
 
 interface Props {
-  navigation: any;
+    navigation: any;
+    route: any;
+    //actions
+    closeDialog: any; gameCreated: any; openDialog: any;
+    //store
+    newGame: any; config: any;
 }
 
-class SinglePlayerGame extends React.Component<Props, State> {
+class GameComponent extends React.Component<Props, State> {
+    color: 'white' | 'black';
+    ws: WebSocket;
+    mode: string;
+    clearBoard: Subject<void> = new Subject<void>()
+
   constructor(props: any) {
     super(props);
-    let game = new Game();
+
     let chessboard = new Chessboard();
-    let wp = new ChessPlayer();
-    let bp = new ChessPlayer();
-    game.init({ canvas: chessboard, whitePlayer: wp, blackPlayer: bp });
 
     this.state = {
-        currentPlayer: wp,
-        whitePlayer: wp,
-        blackPlayer: bp,
+        currentPlayer: null,
+        whitePlayer: null,
+        blackPlayer: null,
         chessboard: chessboard,
         size: getMinWindowSize(),
         moves: [],
@@ -58,15 +80,123 @@ class SinglePlayerGame extends React.Component<Props, State> {
     Dimensions.addEventListener('change', () => this.setState({ size: getMinWindowSize() }));
   }
 
+    componentDidMount() {
+        this.mode = 'twoPlayers';
+        this.newGame();
+    }
+
+    componentDidUpdate() {
+        if (this.props.newGame) {
+            this.mode = this.props.config.mode;
+            this.newGame();
+            this.props.gameCreated();
+        }
+    }
+
+    newGame(newColor?: string) {
+        this.clearBoard.next();
+        if (this.mode === 'onlineGame') {
+            this.newOnlineGame(newColor || this.props.config.color);
+        }
+        else if (this.mode === 'twoPlayers') {
+            this.color = 'white'
+            this.init(new ChessPlayer());
+        }
+    }
+    newOnlineGame(color: string) {
+        this.props.openDialog(
+            <Text>
+                Oczekiwanie na przeciwnika...
+            </Text>
+            , () => {
+                this.ws.close();
+            }
+        )
+        this.ws = new WebSocket('ws://to-go-chess-sockets.herokuapp.com/')
+        this.ws.onerror = (event) => {
+            console.log(event)
+            this.props.openDialog(
+                <Text>
+                    Błąd połączenia...
+                </Text>
+            )
+        }
+        this.ws.onopen = () => {
+            this.ws.send(JSON.stringify({type: 'newGame', color}));
+        }
+        this.ws.onmessage = (event) => {
+            let msg = JSON.parse(String(event.data));
+            if (msg.type === 'config') {
+                this.props.closeDialog();
+                this.color = msg.color;
+                this.init(new SocketPlayer(this.ws));
+            }
+        };
+    }
+
+    init(opponent: Player) {
+        console.log('init')
+        let game = new Game();
+        game.event.subscribe((event: any) => {
+            if (event.type === 'mate') {
+                this.onEndGame(event.data)
+            }
+        });
+        const me = new ChessPlayer();
+        let wp;
+        let bp;
+        if (this.color === 'white') {
+            wp = me;
+            bp = opponent;
+        }
+        else {
+            wp = opponent;
+            bp = me;
+        }
+        game.init({canvas: this.state.chessboard, whitePlayer: wp, blackPlayer: bp});
+
+        this.setState({
+            currentPlayer: me,
+            whitePlayer: wp,
+            blackPlayer: bp,
+        });
+    }
+
+    onEndGame(status: string) {
+        this.props.openDialog(
+            <View>
+                <Text style={{textAlign: 'center'}}>
+                    {status === 'draw' && 'Remis'}
+                    {status === 'white' && 'Wygrywają białe'}
+                    {status === 'black' && 'Wygrywają czarne'}
+                </Text>
+                <ChessButton
+                    onPress={() => {
+                        const color = this.color === 'white' ? 'black' : 'white';
+                        this.props.closeDialog();
+                        this.newGame(color);
+                    }}
+                    title={'Zagraj jeszcze raz'}
+                />
+            </View>
+        )
+    }
+
   render() {
     const { currentPlayer, chessboard, whitePlayer, blackPlayer, size, moves, moveIterator, moveCount } = this.state;
 
     const onMove = (move: string) => {
-      currentPlayer.move(move);
-      if (currentPlayer === whitePlayer)
-        this.setState({ currentPlayer: blackPlayer });
-      if (currentPlayer === blackPlayer)
-        this.setState({ currentPlayer: whitePlayer });
+      if (currentPlayer) currentPlayer.move(move);
+        if (this.mode === 'twoPlayers') {
+            if (currentPlayer === whitePlayer) {
+                this.color = 'black';
+                this.setState({currentPlayer: blackPlayer});
+            }
+            if (currentPlayer === blackPlayer) {
+                this.color = 'white';
+                this.setState({currentPlayer: whitePlayer});
+            }
+        }
 
       if (moveCount >= 1) {
         this.setState({ 
@@ -93,7 +223,7 @@ class SinglePlayerGame extends React.Component<Props, State> {
               </ScrollView>
             </ImageBackground>
 
-            <MobileChessboard style={{ height: size, width: size }} chessboard={chessboard} onMove={onMove}></MobileChessboard>
+            <MobileChessboard clearBoard={this.clearBoard} turn={this.color} style={{ height: size, width: size }} chessboard={chessboard} onMove={onMove} />
 
             <ImageBackground resizeMode='contain' source={require('../images/bottom_buttons.png')} style={{ height: 0.17 * remainingSpace, width: size, ...styles.buttonContainer }}>
               <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.openDrawer()}/>
@@ -196,4 +326,29 @@ const styles = StyleSheet.create({
   }
 });
 
-export default SinglePlayerGame;
+const mapDispatchToProps = (dispatch: any) => ({
+    ...bindActionCreators(
+        {
+            openDialog,
+            closeDialog,
+            gameCreated,
+        },
+        dispatch,
+    ),
+});
+
+const mapStateToProps = (state: any) => {
+    const {config, newGame} = state.app;
+    return {
+        config,
+        newGame,
+    };
+};
+
+const WrappedGameComponent = connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(GameComponent);
+
+
+export default WrappedGameComponent;

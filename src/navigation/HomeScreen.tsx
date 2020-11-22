@@ -1,16 +1,21 @@
-import React from 'react';
-import SinglePlayerGame from "../components/SinglePlayerGame";
+import React, {useEffect} from 'react';
+import GameComponent from "../components/GameComponent";
 import {StyleSheet, View, StatusBar} from "react-native";
 import UserBar from "../components/UserBar";
 
 
-const HomeScreen = ({navigation}: any) => {
+const HomeScreen = ({route, navigation}: any) => {
+
+    useEffect(() => {
+        console.log(route.params);
+    }, [route]);
+
     return (
         <>
             <StatusBar hidden />
             {/* <UserBar navigation={navigation} /> */}
             <View style={styles.container}>
-                <SinglePlayerGame navigation={navigation}/>
+                <GameComponent route={route} navigation={navigation}/>
             </View>
         </>
     );
