@@ -10,47 +10,46 @@ import {
     ImageBackground,
     ScrollView,
     TouchableOpacity,
-    Button
 } from 'react-native';
 import { Subject } from 'rxjs';
 import { Game } from '../common/core/game';
 import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
-import { MobileChessboard } from './MobileChessboard';
 import { getMinWindowSize, getMaxWindowSize, getOrientation } from '../helpers/screen-info';
-import {closeDialog, gameCreated, openDialog} from "../actions";
+import {closeDialog, gameCreated, openDialog, gameObjectCreated, gameTreeUpdated} from "../actions";
 import {SocketPlayer} from "../common/core/socket-player";
 import {ChessButton} from "./ChessButton";
+import {ChessPlayer} from '../common/core/chess-player';
+import {MobileChessboard} from './MobileChessboard';
+import ChessClockConfig from '../common/timer/chess-clock-config';
+import GameTree from './GameTree';
+import MenuBar from './MenuBar';
 
-class ChessPlayer implements Player {
-    color: 'white' | 'black';
-    emitMove: Subject<string> = new Subject<string>();
-
-    move(move: string) {
-        this.emitMove.next(move);
-    }
-
-    receiveMove(move: string) {
-        console.log(this.color + ' player received: ' + move);
-    }
+const config: ChessClockConfig = {
+  initMsBlack: 360 * 1000,
+  initMsWhite: 360 * 1000,
+  stepBlack: 1,
+  stepWhite: 1,
+  mode: {
+    type: 'standard',
+  },
+  endCallback: (winner: string) => {
+    console.log(winner + 'wins');
+  }
 }
 
 interface State {
     currentPlayer: ChessPlayer | null;
-    whitePlayer: ChessPlayer | null;
-    blackPlayer: ChessPlayer | null;
     chessboard: Chessboard;
     size: number;
-    moves: (Text | Element)[];
-    moveCount: number;
-    moveIterator: number;
+    game: any;
 }
 
 interface Props {
     navigation: any;
     route: any;
     //actions
-    closeDialog: any; gameCreated: any; openDialog: any;
+    closeDialog: any; gameCreated: any; openDialog: any; gameObjectCreated: any; gameTreeUpdated: any;
     //store
     newGame: any; config: any;
 }
@@ -58,7 +57,7 @@ interface Props {
 class GameComponent extends React.Component<Props, State> {
     color: 'white' | 'black';
     ws: WebSocket;
-    mode: string;
+    mode: 'onlineGame' | 'twoPlayers' | 'singleGame';
     clearBoard: Subject<void> = new Subject<void>()
 
   constructor(props: any) {
@@ -68,13 +67,9 @@ class GameComponent extends React.Component<Props, State> {
 
     this.state = {
         currentPlayer: null,
-        whitePlayer: null,
-        blackPlayer: null,
         chessboard: chessboard,
         size: getMinWindowSize(),
-        moves: [],
-        moveCount: 1,
-        moveIterator: 1
+        game: null
     };
 
     Dimensions.addEventListener('change', () => this.setState({ size: getMinWindowSize() }));
@@ -103,6 +98,7 @@ class GameComponent extends React.Component<Props, State> {
             this.init(new ChessPlayer());
         }
     }
+
     newOnlineGame(color: string) {
         this.props.openDialog(
             <Text>
@@ -153,12 +149,13 @@ class GameComponent extends React.Component<Props, State> {
             wp = opponent;
             bp = me;
         }
-        game.init({canvas: this.state.chessboard, whitePlayer: wp, blackPlayer: bp});
+        game.init({canvas: this.state.chessboard, whitePlayer: wp, blackPlayer: bp, chessClockConfig: config});
 
+        this.props.gameObjectCreated(game);
+        this.props.gameTreeUpdated(game.getTree().toSerializable());
         this.setState({
             currentPlayer: me,
-            whitePlayer: wp,
-            blackPlayer: bp,
+            game
         });
     }
 
@@ -183,66 +180,53 @@ class GameComponent extends React.Component<Props, State> {
     }
 
   render() {
-    const { currentPlayer, chessboard, whitePlayer, blackPlayer, size, moves, moveIterator, moveCount } = this.state;
+    const { 
+      chessboard,
+      currentPlayer,
+      game,
+      size
+     } = this.state;
 
     const onMove = (move: string) => {
-      if (currentPlayer) currentPlayer.move(move);
-        if (this.mode === 'twoPlayers') {
-            if (currentPlayer === whitePlayer) {
-                this.color = 'black';
-                this.setState({currentPlayer: blackPlayer});
-            }
-            if (currentPlayer === blackPlayer) {
-                this.color = 'white';
-                this.setState({currentPlayer: whitePlayer});
-            }
-        }
-
-      if (moveCount >= 1) {
-        this.setState({ 
-          moveCount: 0, 
-          moveIterator: moveIterator + 1,
-          moves: [...moves, <Text key={moveCount.toString() + moveIterator} style={{fontWeight: '200'}}><Text style={{fontWeight: 'bold', fontSize: 17}}>{moveIterator}.</Text> {move} </Text> ]
-        });
-      } else {
-        this.setState({ 
-          moveCount: moveCount + 1, 
-          moves: [...moves, <Text key={moveCount.toString() + moveIterator} style={{fontWeight: '200'}}> {move}  </Text> ]
-        });
+      if (this.mode === 'onlineGame' || this.mode === 'singleGame') {
+        currentPlayer.move(move);
       }
+      else {
+        if (game.getTurn() === 'white') {
+          game.whitePlayer.move(move);
+          this.color = 'black';
+        } else {
+          game.blackPlayer.move(move);
+          this.color = 'white';
+        }
+        this.props.gameTreeUpdated(game.getTree().toSerializable());
+      }
+        this.props.gameTreeUpdated(game.getTree().toSerializable());
     };
-
+    
     const remainingSpace = getMaxWindowSize() - getMinWindowSize(); 
-
     return (
          <View style={styles.container}>
             <StatusBar hidden />
-            <ImageBackground resizeMode='stretch' source={require('../images/texture_of_burnt_wood.png')} style={{ height: 0.6 * remainingSpace, width: size }}>
-              <ScrollView>
-                <Text style={styles.console}>{moves}</Text>
-              </ScrollView>
-            </ImageBackground>
-
-            <MobileChessboard clearBoard={this.clearBoard} turn={this.color} style={{ height: size, width: size }} chessboard={chessboard} onMove={onMove} />
-
-            <ImageBackground resizeMode='contain' source={require('../images/bottom_buttons.png')} style={{ height: 0.17 * remainingSpace, width: size, ...styles.buttonContainer }}>
-              <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.openDrawer()}/>
-              <TouchableOpacity style={styles.button} onPress={() => console.log("Go move back button pressed.")}/>
-              <TouchableOpacity style={styles.button} onPress={() => console.log("Go move next button pressed.")}/>
-              <TouchableOpacity style={styles.button} onPress={() => console.log("Refresh button pressed.")}/>
-              <TouchableOpacity style={styles.button} onPress={() => console.log("Smiley face button pressed.")}/>
-            </ImageBackground>
+            <GameTree style={{ height: 0.6 * remainingSpace, width: size }}/>
+            <MobileChessboard 
+              clearBoard={this.clearBoard} 
+              turn={this.color} 
+              mode={this.mode}
+              style={{ height: size, width: size }} 
+              chessboard={chessboard} 
+              onMove={onMove} 
+            />
+            <MenuBar 
+              style={{height: 0.17 * remainingSpace, width: size}} 
+              navigation={this.props.navigation}
+            />
 
             <View style={{ height: 0.23 * remainingSpace, width: size, ...styles.playerInfo }}>
               <View style={styles.timersContainer}>
                   <Text style={styles.timer}> 05:00 </Text>
                   <Text style={styles.timer}> 05:00 </Text>
               </View>
-              {/* <View style={styles.gameType}>
-                <Text style={{color: '#707070', fontSize: 12}}>
-                  Offline game
-                </Text>
-              </View> */}
               <View style={styles.playerContainer}>
                   <View style={styles.whiteBox}/>
                   <Text style={styles.player}>Player 1</Text>
@@ -262,12 +246,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignContent: 'center',
     backgroundColor: '#2d0a0a'
-  },
-  buttonContainer: {
-    flexDirection: 'row'
-  },
-  button: {
-    width: '20%',
   },
   console: {
     margin: 10,
@@ -295,10 +273,6 @@ const styles = StyleSheet.create({
   text: {
     color: '#707070',
     fontFamily: 'SegoeUI-Bold',
-  },
-  gameType: {
-    flex: 0.5,
-    alignSelf: 'center',
   },
   playerContainer: {
     flexDirection: 'row',
@@ -332,6 +306,8 @@ const mapDispatchToProps = (dispatch: any) => ({
             openDialog,
             closeDialog,
             gameCreated,
+            gameObjectCreated,
+            gameTreeUpdated
         },
         dispatch,
     ),

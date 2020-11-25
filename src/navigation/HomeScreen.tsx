@@ -7,7 +7,7 @@ import UserBar from "../components/UserBar";
 const HomeScreen = ({route, navigation}: any) => {
 
     useEffect(() => {
-        console.log(route.params);
+        console.log("route.params =", route.params);
     }, [route]);
 
     return (

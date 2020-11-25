@@ -16,6 +16,7 @@ interface Props {
     style: any;
     turn: string;
     clearBoard: Subject<void>;
+    mode: 'singleGame' | 'onlineGame' | 'twoPlayers';
 }
 
 
@@ -78,21 +79,26 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
         props.chessboard.callback = (newPosition) => {
             setPositionFEN(newPosition);
             setBoardInfo(new BoardInfo().fromFEN(newPosition));
+            setFirstPress(undefined);
+            setLastMove(undefined);
         };
     });
 
     useEffect(() => {
-        props.clearBoard.subscribe(() => {
-            setFirstPress(undefined);
-            setLastMove(undefined);
-        });
-        return props.clearBoard.unsubscribe;
+        // props.clearBoard.subscribe(() => {
+        //     setFirstPress(undefined);
+        //     setLastMove(undefined);
+        // });
+        // return props.clearBoard.unsubscribe;
     }, []);
     
     const onPress = (piece: Piece, row: number, column: number) => {
+        if ((props.mode === 'onlineGame' || props.mode === 'singleGame') && piece !== undefined && props.turn !== piece.color) {
+            return;
+        }
         if (piece === firstPress?.piece) {
             setFirstPress(undefined);
-        } else if (piece !== undefined && props.turn == piece.color && boardInfo.turn === piece.color) {
+        } else if (piece !== undefined && boardInfo.turn === piece.color) {
             setFirstPress({
                 piece, 
                 possibleMoves: piece.possibleMoves(boardInfo)
@@ -157,7 +163,7 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
         } 
     };
 
-    const items = generateGridItems(boardInfo, onPress, firstPress, lastMove);
+    var items = generateGridItems(boardInfo, onPress, firstPress, lastMove);
 
     return (
         <View style={props.style}>

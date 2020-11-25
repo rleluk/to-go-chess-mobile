@@ -31,3 +31,13 @@ export const createGame = (config: any) => ({
 export const gameCreated = () => ({
     type: 'GAME_CREATED',
 });
+
+export const gameObjectCreated = (game: any) => ({
+    type: 'GAME_OBJECT_CREATED',
+    game
+});
+
+export const gameTreeUpdated = (gameTree: any) => ({
+    type: 'GAME_TREE_UPDATED',
+    gameTree
+});

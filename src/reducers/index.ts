@@ -10,6 +10,16 @@ const initialApp = {
 const app = (state = initialApp, action: any) => {
     let array, index;
     switch (action.type) {
+        case 'GAME_TREE_UPDATED':
+            return {
+                ...state,
+                gameTree: action.gameTree
+            };
+        case 'GAME_OBJECT_CREATED':
+            return {
+                ...state,
+                game: action.game
+            };
         case 'LOADING':
             return {
                 ...state,
