@@ -26,16 +26,16 @@ import GameTree from './GameTree';
 import MenuBar from './MenuBar';
 
 const config: ChessClockConfig = {
-  initMsBlack: 360 * 1000,
-  initMsWhite: 360 * 1000,
-  stepBlack: 1,
-  stepWhite: 1,
-  mode: {
-    type: 'standard',
-  },
-  endCallback: (winner: string) => {
-    console.log(winner + 'wins');
-  }
+    initMsBlack: 360 * 1000,
+    initMsWhite: 360 * 1000,
+    stepBlack: 1,
+    stepWhite: 1,
+    mode: {
+        type: 'standard',
+    },
+    endCallback: (winner: string) => {
+        console.log(winner + 'wins');
+    }
 }
 
 interface State {
@@ -60,20 +60,20 @@ class GameComponent extends React.Component<Props, State> {
     mode: 'onlineGame' | 'twoPlayers' | 'singleGame';
     clearBoard: Subject<void> = new Subject<void>()
 
-  constructor(props: any) {
-    super(props);
+    constructor(props: any) {
+        super(props);
 
-    let chessboard = new Chessboard();
+        let chessboard = new Chessboard();
 
-    this.state = {
-        currentPlayer: null,
-        chessboard: chessboard,
-        size: getMinWindowSize(),
-        game: null
-    };
+        this.state = {
+            currentPlayer: null,
+            chessboard: chessboard,
+            size: getMinWindowSize(),
+            game: null
+        };
 
-    Dimensions.addEventListener('change', () => this.setState({ size: getMinWindowSize() }));
-  }
+        Dimensions.addEventListener('change', () => this.setState({ size: getMinWindowSize() }));
+    }
 
     componentDidMount() {
         this.mode = 'twoPlayers';
@@ -97,6 +97,10 @@ class GameComponent extends React.Component<Props, State> {
             this.color = 'white'
             this.init(new ChessPlayer());
         }
+        else if (this.mode === 'singleGame') {
+            this.color = 'white'
+            this.newOnlineAiGame(newColor || this.props.config.color);
+        }
     }
 
     newOnlineGame(color: string) {
@@ -119,6 +123,37 @@ class GameComponent extends React.Component<Props, State> {
         }
         this.ws.onopen = () => {
             this.ws.send(JSON.stringify({type: 'newGame', color}));
+        }
+        this.ws.onmessage = (event) => {
+            let msg = JSON.parse(String(event.data));
+            if (msg.type === 'config') {
+                this.props.closeDialog();
+                this.color = msg.color;
+                this.init(new SocketPlayer(this.ws));
+            }
+        };
+    }
+
+    newOnlineAiGame(color: string) {
+        this.props.openDialog(
+            <Text>
+                Oczekiwanie na połączenie...
+            </Text>
+            , () => {
+                this.ws.close();
+            }
+        )
+        this.ws = new WebSocket('ws://to-go-chess-sockets.herokuapp.com/')
+        this.ws.onerror = (event) => {
+            console.log(event)
+            this.props.openDialog(
+                <Text>
+                    Błąd połączenia...
+                </Text>
+            )
+        }
+        this.ws.onopen = () => {
+            this.ws.send(JSON.stringify({type: 'newAiGame', color}));
         }
         this.ws.onmessage = (event) => {
             let msg = JSON.parse(String(event.data));
@@ -179,125 +214,125 @@ class GameComponent extends React.Component<Props, State> {
         )
     }
 
-  render() {
-    const { 
-      chessboard,
-      currentPlayer,
-      game,
-      size
-     } = this.state;
+    render() {
+        const {
+            chessboard,
+            currentPlayer,
+            game,
+            size
+        } = this.state;
 
-    const onMove = (move: string) => {
-      if (this.mode === 'onlineGame' || this.mode === 'singleGame') {
-        currentPlayer.move(move);
-      }
-      else {
-        if (game.getTurn() === 'white') {
-          game.whitePlayer.move(move);
-          this.color = 'black';
-        } else {
-          game.blackPlayer.move(move);
-          this.color = 'white';
-        }
-        this.props.gameTreeUpdated(game.getTree().toSerializable());
-      }
-        this.props.gameTreeUpdated(game.getTree().toSerializable());
-    };
-    
-    const remainingSpace = getMaxWindowSize() - getMinWindowSize(); 
-    return (
-         <View style={styles.container}>
-            <StatusBar hidden />
-            <GameTree style={{ height: 0.6 * remainingSpace, width: size }}/>
-            <MobileChessboard 
-              clearBoard={this.clearBoard} 
-              turn={this.color} 
-              mode={this.mode}
-              style={{ height: size, width: size }} 
-              chessboard={chessboard} 
-              onMove={onMove} 
-            />
-            <MenuBar 
-              style={{height: 0.17 * remainingSpace, width: size}} 
-              navigation={this.props.navigation}
-            />
+        const onMove = (move: string) => {
+            if (this.mode === 'onlineGame' || this.mode === 'singleGame') {
+                currentPlayer.move(move);
+            }
+            else {
+                if (game.getTurn() === 'white') {
+                    game.whitePlayer.move(move);
+                    this.color = 'black';
+                } else {
+                    game.blackPlayer.move(move);
+                    this.color = 'white';
+                }
+                this.props.gameTreeUpdated(game.getTree().toSerializable());
+            }
+            this.props.gameTreeUpdated(game.getTree().toSerializable());
+        };
 
-            <View style={{ height: 0.23 * remainingSpace, width: size, ...styles.playerInfo }}>
-              <View style={styles.timersContainer}>
-                  <Text style={styles.timer}> 05:00 </Text>
-                  <Text style={styles.timer}> 05:00 </Text>
-              </View>
-              <View style={styles.playerContainer}>
-                  <View style={styles.whiteBox}/>
-                  <Text style={styles.player}>Player 1</Text>
-                  <Text style={styles.player}>Player 2</Text>
-                  <View style={styles.blackBox}/>
-              </View>
+        const remainingSpace = getMaxWindowSize() - getMinWindowSize();
+        return (
+            <View style={styles.container}>
+                <StatusBar hidden />
+                <GameTree style={{ height: 0.6 * remainingSpace, width: size }}/>
+                <MobileChessboard
+                    clearBoard={this.clearBoard}
+                    turn={this.color}
+                    mode={this.mode}
+                    style={{ height: size, width: size }}
+                    chessboard={chessboard}
+                    onMove={onMove}
+                />
+                <MenuBar
+                    style={{height: 0.17 * remainingSpace, width: size}}
+                    navigation={this.props.navigation}
+                />
+
+                <View style={{ height: 0.23 * remainingSpace, width: size, ...styles.playerInfo }}>
+                    <View style={styles.timersContainer}>
+                        <Text style={styles.timer}> 05:00 </Text>
+                        <Text style={styles.timer}> 05:00 </Text>
+                    </View>
+                    <View style={styles.playerContainer}>
+                        <View style={styles.whiteBox}/>
+                        <Text style={styles.player}>Player 1</Text>
+                        <Text style={styles.player}>Player 2</Text>
+                        <View style={styles.blackBox}/>
+                    </View>
+                </View>
             </View>
-        </View>
-    );
-  }
+        );
+    }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignContent: 'center',
-    backgroundColor: '#2d0a0a'
-  },
-  console: {
-    margin: 10,
-    overflow: 'hidden',
-    fontSize: 16
-  },
-  playerInfo: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignContent: 'center',
-    backgroundColor: '#fff3ccbb',
-    padding: 5
-  },
-  timersContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignContent: 'center',
-  }, 
-  timer: {
-    color: '#707070',
-    fontWeight: 'bold',
-    fontSize: 18
-  },
-  text: {
-    color: '#707070',
-    fontFamily: 'SegoeUI-Bold',
-  },
-  playerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  player: {
-    color: '#707070',
-    fontFamily: 'SegoeUI-Bold',
-    fontSize: 15,
-  },
-  blackBox: {
-    borderColor: '#96031caa',
-    borderWidth: 2,
-    height: 25,
-    width: 24,
-    backgroundColor: '#434343'
-  },
-  whiteBox: {
-    borderColor: '#96031caa',
-    borderWidth: 2,
-    height: 25,
-    width: 25,
-    backgroundColor: '#d9d9d9'
-  }
+    container: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignContent: 'center',
+        backgroundColor: '#2d0a0a'
+    },
+    console: {
+        margin: 10,
+        overflow: 'hidden',
+        fontSize: 16
+    },
+    playerInfo: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignContent: 'center',
+        backgroundColor: '#fff3ccbb',
+        padding: 5
+    },
+    timersContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignContent: 'center',
+    },
+    timer: {
+        color: '#707070',
+        fontWeight: 'bold',
+        fontSize: 18
+    },
+    text: {
+        color: '#707070',
+        fontFamily: 'SegoeUI-Bold',
+    },
+    playerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    player: {
+        color: '#707070',
+        fontFamily: 'SegoeUI-Bold',
+        fontSize: 15,
+    },
+    blackBox: {
+        borderColor: '#96031caa',
+        borderWidth: 2,
+        height: 25,
+        width: 24,
+        backgroundColor: '#434343'
+    },
+    whiteBox: {
+        borderColor: '#96031caa',
+        borderWidth: 2,
+        height: 25,
+        width: 25,
+        backgroundColor: '#d9d9d9'
+    }
 });
 
 const mapDispatchToProps = (dispatch: any) => ({

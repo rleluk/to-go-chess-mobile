@@ -20,182 +20,216 @@ import {getComponent, getComponentBySymbol} from '../helpers/get-component';
 
 const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
   return (
-    <View style={{ flex: 1 }}>
-      <DrawerContentScrollView>
-        <View style={styles.drawerContent}>
-          <View style={styles.userInfoSection}>
-            <View style={{ flexDirection: 'row', marginTop: 15 }}>
-              <Avatar.Image source={require('../images/guest.png')} size={60} />
-              <View style={{ marginLeft: 15, flexDirection: 'column' }}>
-                <Title style={styles.title}>John Doe</Title>
-                <Caption style={styles.caption}>1222</Caption>
+      <View style={{ flex: 1 }}>
+        <DrawerContentScrollView>
+          <View style={styles.drawerContent}>
+            <View style={styles.userInfoSection}>
+              <View style={{ flexDirection: 'row', marginTop: 15 }}>
+                <Avatar.Image source={require('../images/guest.png')} size={60} />
+                <View style={{ marginLeft: 15, flexDirection: 'column' }}>
+                  <Title style={styles.title}>John Doe</Title>
+                  <Caption style={styles.caption}>1222</Caption>
+                </View>
               </View>
             </View>
+            <Drawer.Section>
+              <View style={styles.drawerSection}>
+                <DrawerItem
+                    style={styles.inGameOptions}
+                    icon={({color, size}) => (
+                        <MaterialCommunityIcon
+                            name="handshake"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Zaproponuj remis"
+                    onPress={() => {}}
+                />
+                <DrawerItem
+                    style={styles.inGameOptions}
+                    icon={({color, size}) => (
+                        <FontAwesome5Icon
+                            name="chess-king"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Poddaj się"
+                    onPress={() => {}}
+                />
+              </View>
+              <View style={styles.drawerSection}>
+                <DrawerItem
+                    style={styles.newGameOptions}
+                    icon={({color, size}) => (
+                        <MaterialIcon
+                            name="computer"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Gra z komputerem"
+                    onPress={ () => {
+                      openDialog(
+                          <View>
+                            <Text style={{textAlign: 'center'}}>Wybierz kolor</Text>
+                            <View style={styles.piecesBar}>
+                              <TouchableOpacity style={styles.piece} onPress={() => {
+                                closeDialog();
+                                createGame({mode: 'singleGame', color: 'white'})
+                                navigation.navigate('Home');
+                              }} >{ getComponentBySymbol('K') }</TouchableOpacity>
+                              <TouchableOpacity style={styles.doublePiece} onPress={() => {
+                                closeDialog();
+                                createGame({mode: 'singleGame', color: 'random'})
+                                navigation.navigate('Home');
+                              }} >
+                                <View style={styles.halfPiece}>
+                                  <View style={styles.piece}>
+                                    { getComponentBySymbol('K') }
+                                  </View>
+                                </View>
+                                <View style={styles.halfPiece}>
+                                  <View style={styles.halfBlackPiece}>
+                                    { getComponentBySymbol('k') }
+                                  </View>
+                                </View>
+                              </TouchableOpacity>
+                              <TouchableOpacity style={styles.piece} onPress={() => {
+                                closeDialog();
+                                createGame({mode: 'singleGame', color: 'black'})
+                                navigation.navigate('Home');
+                              }} >{ getComponentBySymbol('k') }</TouchableOpacity>
+                            </View>
+                          </View>
+                      );
+                    }}
+                />
+                <DrawerItem
+                    style={styles.newGameOptions}
+                    icon={({color, size}) => (
+                        <IonIcon
+                            name="person"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Gra online"
+                    onPress={ () => {
+                      openDialog(
+                          <View>
+                            <Text style={{textAlign: 'center'}}>Wybierz kolor</Text>
+                            <View style={styles.piecesBar}>
+                              <TouchableOpacity style={styles.piece} onPress={() => {
+                                closeDialog();
+                                createGame({mode: 'onlineGame', color: 'white'})
+                                navigation.navigate('Home');
+                              }} >{ getComponentBySymbol('K') }</TouchableOpacity>
+                              <TouchableOpacity style={styles.doublePiece} onPress={() => {
+                                closeDialog();
+                                createGame({mode: 'onlineGame', color: 'random'})
+                                navigation.navigate('Home');
+                              }} >
+                                <View style={styles.halfPiece}>
+                                  <View style={styles.piece}>
+                                    { getComponentBySymbol('K') }
+                                  </View>
+                                </View>
+                                <View style={styles.halfPiece}>
+                                  <View style={styles.halfBlackPiece}>
+                                    { getComponentBySymbol('k') }
+                                  </View>
+                                </View>
+                              </TouchableOpacity>
+                              <TouchableOpacity style={styles.piece} onPress={() => {
+                                closeDialog();
+                                createGame({mode: 'onlineGame', color: 'black'})
+                                navigation.navigate('Home');
+                              }} >{ getComponentBySymbol('k') }</TouchableOpacity>
+                            </View>
+                          </View>
+                      );
+                    }}
+                />
+                <DrawerItem
+                    style={styles.newGameOptions}
+                    icon={({color, size}) => (
+                        <IonIcon
+                            name="people"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Dwoje graczy"
+                    onPress={ () => {
+                      createGame({mode: 'twoPlayers'});
+                      navigation.navigate('Home');
+                    }}
+                />
+              </View>
+              <View style={styles.drawerSection}>
+                <DrawerItem
+                    style={styles.otherOptions}
+                    icon={({color, size}) => (
+                        <MaterialCommunityIcon
+                            name="google-analytics"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Analiza partii"
+                    onPress={() => {}}
+                />
+                <DrawerItem
+                    style={styles.otherOptions}
+                    icon={({color, size}) => (
+                        <MaterialCommunityIcon
+                            name="database-import"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Importuj / Eksportuj"
+                    onPress={() => {}}
+                />
+                <DrawerItem
+                    style={styles.otherOptions}
+                    icon={({color, size}) => (
+                        <IonIcon
+                            name="settings"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Ustawienia"
+                    onPress={() => {}}
+                />
+              </View>
+            </Drawer.Section>
           </View>
-          <Drawer.Section>
-            <View style={styles.drawerSection}>
-              <DrawerItem 
-                style={styles.inGameOptions}
-                icon={({color, size}) => (
-                    <MaterialCommunityIcon 
-                    name="handshake" 
-                    color={color}
-                    size={size}
-                    />
-                )}
-                label="Zaproponuj remis"
-                onPress={() => {}}
-              />
-              <DrawerItem 
-                style={styles.inGameOptions}
-                icon={({color, size}) => (
-                    <FontAwesome5Icon 
-                    name="chess-king" 
-                    color={color}
-                    size={size}
-                    />
-                )}
-                label="Poddaj się"
-                onPress={() => {}}
-              />
-            </View>
-            <View style={styles.drawerSection}>
-              <DrawerItem 
-                style={styles.newGameOptions}
-                icon={({color, size}) => (
-                    <MaterialIcon 
-                    name="computer" 
-                    color={color}
-                    size={size}
-                    />
-                )}
-                label="Gra z komputerem"
-                onPress={() => {}}
-              />
-              <DrawerItem 
-                style={styles.newGameOptions}
-                icon={({color, size}) => (
-                    <IonIcon 
-                    name="person" 
-                    color={color}
-                    size={size}
-                    />
-                )}
-                label="Gra online"
-                onPress={ () => {
-                  openDialog(
-                      <View>
-                        <Text style={{textAlign: 'center'}}>Wybierz kolor</Text>
-                        <View style={styles.piecesBar}>
-                          <TouchableOpacity style={styles.piece} onPress={() => {
-                            closeDialog();
-                            createGame({mode: 'onlineGame', color: 'white'})
-                            navigation.navigate('Home');
-                          }} >{ getComponentBySymbol('K') }</TouchableOpacity>
-                          <TouchableOpacity style={styles.doublePiece} onPress={() => {
-                            closeDialog();
-                            createGame({mode: 'onlineGame', color: 'random'})
-                            navigation.navigate('Home');
-                          }} >
-                            <View style={styles.halfPiece}>
-                              <View style={styles.piece}>
-                                { getComponentBySymbol('K') }
-                              </View>
-                            </View>
-                            <View style={styles.halfPiece}>
-                              <View style={styles.halfBlackPiece}>
-                                { getComponentBySymbol('k') }
-                              </View>
-                            </View>
-                          </TouchableOpacity>
-                          <TouchableOpacity style={styles.piece} onPress={() => {
-                            closeDialog();
-                            createGame({mode: 'onlineGame', color: 'black'})
-                            navigation.navigate('Home');
-                          }} >{ getComponentBySymbol('k') }</TouchableOpacity>
-                        </View>
-                      </View>
-                  );
-                }}
-              />
-              <DrawerItem 
-                style={styles.newGameOptions}
-                icon={({color, size}) => (
-                    <IonIcon 
-                    name="people" 
-                    color={color}
-                    size={size}
-                    />
-                )}
-                label="Dwoje graczy"
-                onPress={ () => {
-                  createGame({mode: 'twoPlayers'});
-                  navigation.navigate('Home');
-                }}
-              />
-            </View>
-            <View style={styles.drawerSection}>
-              <DrawerItem 
-                style={styles.otherOptions}
-                icon={({color, size}) => (
-                    <MaterialCommunityIcon 
-                    name="google-analytics" 
-                    color={color}
-                    size={size}
-                    />
-                )}
-                label="Analiza partii"
-                onPress={() => {}}
-              />
-              <DrawerItem 
-                style={styles.otherOptions}
-                icon={({color, size}) => (
-                    <MaterialCommunityIcon 
-                    name="database-import" 
-                    color={color}
-                    size={size}
-                    />
-                )}
-                label="Importuj / Eksportuj"
-                onPress={() => {}}
-              />
-              <DrawerItem 
-                style={styles.otherOptions}
-                icon={({color, size}) => (
-                    <IonIcon 
-                    name="settings" 
-                    color={color}
-                    size={size}
-                    />
-                )}
-                label="Ustawienia"
-                onPress={() => {}}
-              />
-            </View>
-          </Drawer.Section>
-        </View>
-        <View style={styles.drawerSection}>
-          {user ? (
-              <DrawerItem style={styles.bottomDrawerOptions}
-                icon={({ color, size }) => (
-                  <IonIcon name="exit-outline" color={color} size={size} />
-                )}
-                label="Wyloguj się"
-                onPress={logout}
-              />) : (
-              <DrawerItem style={styles.bottomDrawerOptions}
-                icon={({ color, size }) => (
-                  <IonIcon name="enter-outline" color={color} size={size} />
-                )}
-                label="Zaloguj się"
-                onPress={() => {
-                  navigation.navigate('Sign in');
-                }}
-              />)
-          }
-        </View>
-      </DrawerContentScrollView>
-    </View>
+          <View style={styles.drawerSection}>
+            {user ? (
+                <DrawerItem style={styles.bottomDrawerOptions}
+                            icon={({ color, size }) => (
+                                <IonIcon name="exit-outline" color={color} size={size} />
+                            )}
+                            label="Wyloguj się"
+                            onPress={logout}
+                />) : (
+                <DrawerItem style={styles.bottomDrawerOptions}
+                            icon={({ color, size }) => (
+                                <IonIcon name="enter-outline" color={color} size={size} />
+                            )}
+                            label="Zaloguj się"
+                            onPress={() => {
+                              navigation.navigate('Sign in');
+                            }}
+                />)
+            }
+          </View>
+        </DrawerContentScrollView>
+      </View>
   );
 };
 
@@ -276,10 +310,10 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state: any) => {
   const {user, isLoading, isSignout, stackLoading} = state.app;
   return {
-      user,
-      isLoading,
-      isSignout,
-      stackLoading,
+    user,
+    isLoading,
+    isSignout,
+    stackLoading,
   };
 };
 
