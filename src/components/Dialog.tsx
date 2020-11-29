@@ -5,6 +5,7 @@ import {closeDialog} from "../actions";
 import {Modal, StyleSheet, View, Text, TouchableOpacity} from "react-native";
 
 const Dialog = (props: any) => {
+    console.log(props)
     if (!props.dialog || !props.dialog.content) {
         return <></>
     }

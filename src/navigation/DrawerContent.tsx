@@ -16,9 +16,66 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {bindActionCreators} from "redux";
 import {closeDialog, createGame, gameCreated, openDialog} from "../actions";
-import {getComponent, getComponentBySymbol} from '../helpers/get-component';
+import {getComponentBySymbol} from '../helpers/get-component';
 
 const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
+  const chooseClockType = (mode: string, color: string) => {
+    openDialog(
+      <View>
+        <Text style={{textAlign: 'center', paddingBottom: 5}}>Wybierz tryb czasowy</Text>
+        <View style={styles.clockTypeBar}>
+          <TouchableOpacity style={styles.clockType} onPress={() => {
+            closeDialog();
+            createGame({mode, color, clockType: 'standard'});
+            navigation.navigate('Home');
+          }} >
+            <Text style={{fontWeight: 'bold', color: 'brown'}}>Standard</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.clockType} onPress={() => {
+            closeDialog();
+            createGame({mode, color, clockType: 'fischer'});
+            navigation.navigate('Home');
+          }}>
+            <Text style={{fontWeight: 'bold', color: 'brown'}}>Fisher</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  const chooseConfig = (mode: string) => {
+    openDialog(
+      <View>
+        <Text style={{textAlign: 'center'}}>Wybierz kolor</Text>
+        <View style={styles.piecesBar}>
+          <TouchableOpacity style={styles.piece} onPress={() => {
+            closeDialog();
+            chooseClockType(mode, 'white');
+          }} >{ getComponentBySymbol('K') }</TouchableOpacity>
+          <TouchableOpacity style={styles.doublePiece} onPress={() => {
+            closeDialog();
+            chooseClockType(mode, 'random');
+          }} >
+            <View style={styles.halfPiece}>
+              <View style={styles.piece}>
+                { getComponentBySymbol('K') }
+              </View>
+            </View>
+            <View style={styles.halfPiece}>
+              <View style={styles.halfBlackPiece}>
+                { getComponentBySymbol('k') }
+              </View>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.piece} onPress={() => {
+            closeDialog();
+            chooseClockType(mode, 'black');
+          }} >{ getComponentBySymbol('k') }</TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+  
   return (
       <View style={{ flex: 1 }}>
         <DrawerContentScrollView>
@@ -71,39 +128,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
                     )}
                     label="Gra z komputerem"
                     onPress={ () => {
-                      openDialog(
-                          <View>
-                            <Text style={{textAlign: 'center'}}>Wybierz kolor</Text>
-                            <View style={styles.piecesBar}>
-                              <TouchableOpacity style={styles.piece} onPress={() => {
-                                closeDialog();
-                                createGame({mode: 'singleGame', color: 'white'})
-                                navigation.navigate('Home');
-                              }} >{ getComponentBySymbol('K') }</TouchableOpacity>
-                              <TouchableOpacity style={styles.doublePiece} onPress={() => {
-                                closeDialog();
-                                createGame({mode: 'singleGame', color: 'random'})
-                                navigation.navigate('Home');
-                              }} >
-                                <View style={styles.halfPiece}>
-                                  <View style={styles.piece}>
-                                    { getComponentBySymbol('K') }
-                                  </View>
-                                </View>
-                                <View style={styles.halfPiece}>
-                                  <View style={styles.halfBlackPiece}>
-                                    { getComponentBySymbol('k') }
-                                  </View>
-                                </View>
-                              </TouchableOpacity>
-                              <TouchableOpacity style={styles.piece} onPress={() => {
-                                closeDialog();
-                                createGame({mode: 'singleGame', color: 'black'})
-                                navigation.navigate('Home');
-                              }} >{ getComponentBySymbol('k') }</TouchableOpacity>
-                            </View>
-                          </View>
-                      );
+                      chooseConfig('singleGame');
                     }}
                 />
                 <DrawerItem
@@ -117,39 +142,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
                     )}
                     label="Gra online"
                     onPress={ () => {
-                      openDialog(
-                          <View>
-                            <Text style={{textAlign: 'center'}}>Wybierz kolor</Text>
-                            <View style={styles.piecesBar}>
-                              <TouchableOpacity style={styles.piece} onPress={() => {
-                                closeDialog();
-                                createGame({mode: 'onlineGame', color: 'white'})
-                                navigation.navigate('Home');
-                              }} >{ getComponentBySymbol('K') }</TouchableOpacity>
-                              <TouchableOpacity style={styles.doublePiece} onPress={() => {
-                                closeDialog();
-                                createGame({mode: 'onlineGame', color: 'random'})
-                                navigation.navigate('Home');
-                              }} >
-                                <View style={styles.halfPiece}>
-                                  <View style={styles.piece}>
-                                    { getComponentBySymbol('K') }
-                                  </View>
-                                </View>
-                                <View style={styles.halfPiece}>
-                                  <View style={styles.halfBlackPiece}>
-                                    { getComponentBySymbol('k') }
-                                  </View>
-                                </View>
-                              </TouchableOpacity>
-                              <TouchableOpacity style={styles.piece} onPress={() => {
-                                closeDialog();
-                                createGame({mode: 'onlineGame', color: 'black'})
-                                navigation.navigate('Home');
-                              }} >{ getComponentBySymbol('k') }</TouchableOpacity>
-                            </View>
-                          </View>
-                      );
+                      chooseConfig('onlineGame');
                     }}
                 />
                 <DrawerItem
@@ -163,8 +156,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
                     )}
                     label="Dwoje graczy"
                     onPress={ () => {
-                      createGame({mode: 'twoPlayers'});
-                      navigation.navigate('Home');
+                      chooseClockType('twoPlayers', 'white');
                     }}
                 />
               </View>
@@ -234,6 +226,18 @@ const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
 };
 
 const styles = StyleSheet.create({
+  clockTypeBar: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  clockType: {
+    height: 30,
+    display: 'flex',
+    justifyContent: 'center',
+    alignContent: 'center',
+    flexDirection: 'column',
+  },
   piecesBar: {
     flexDirection: 'row',
     justifyContent: 'center',
