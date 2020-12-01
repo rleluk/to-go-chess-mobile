@@ -5,16 +5,18 @@ import {FunctionComponent} from 'react';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 
-interface Props {style, game}
+interface Props {style, game, isTreeEnabled}
 
 export const GameInfo: FunctionComponent<Props> = (props: Props) => {
     const [time, setTime] = useState<any>();
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setTime(props.game.getTimes());
-        }, 250);
-        return () => clearInterval(interval);
+        if (!props.isTreeEnabled) {
+            const interval = setInterval(() => {
+                setTime(props.game.getTimes());
+            }, 250);
+            return () => clearInterval(interval);
+        }
     });
 
     return (
@@ -111,9 +113,10 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {game} = state.app;
+    const {game, isTreeEnabled} = state.app;
     return {
-        game
+        game,
+        isTreeEnabled
     };
 };
 

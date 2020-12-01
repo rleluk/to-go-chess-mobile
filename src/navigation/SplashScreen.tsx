@@ -1,10 +1,14 @@
 import React from 'react';
 import {StyleSheet, View, Text, ImageBackground} from "react-native";
 
+interface Props {
+    navigation?: any;
+    style?: any;
+}
 
-const SplashScreen = ({navigation}: any) => {
+const SplashScreen = (props: Props) => {
     return (
-        <ImageBackground resizeMode='stretch' source={require('../images/background.png')} style={styles.container}>
+        <ImageBackground resizeMode='stretch' source={require('../images/background.png')} style={{...styles.container, ...props.style}}>
             <Text style={{color: 'white', fontSize: 25}}>Ładowanie...</Text>
         </ImageBackground>
     );

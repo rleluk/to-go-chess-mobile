@@ -10,8 +10,9 @@ import {NavigationContainer} from "@react-navigation/native";
 import {createStackNavigator} from '@react-navigation/stack';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import DrawerContent from './src/navigation/DrawerContent';
-import SignUpScreen from "./src/navigation/SignUpScreen";
-import SignInScreen from "./src/navigation/SignInScreen";
+import SignUpScreen from './src/navigation/SignUpScreen';
+import SignInScreen from './src/navigation/SignInScreen';
+import AnalysisScreen from './src/navigation/AnalysisScreen';
 
 import {restoreUser} from "./src/actions";
 
@@ -42,14 +43,15 @@ function App(props: any) {
             drawerStyle={{  backgroundColor: '#f2f6e7', opacity: 0.9 }}
             drawerContent={props => <DrawerContent {...props}/>}
         >
-            {props.isLoading ? (
+            { 
+                props.isLoading ? (
                 <Drawer.Screen
                     name="Splash"
                     component={SplashScreen}
                     options={{headerShown: false}}
-                />) :(
-                <>
+                />) : (<>
                     <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
+                    <Drawer.Screen name="Analysis" component={AnalysisScreen} options={{headerShown: false}}/>
                     <Drawer.Screen name="Sign up" component={SignUpScreen} />
                     <Drawer.Screen name="Sign in" component={SignInScreen} />
                 </>)

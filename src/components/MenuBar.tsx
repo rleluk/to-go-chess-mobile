@@ -5,7 +5,7 @@ import {bindActionCreators} from 'redux';
 import {gameTreeUpdated} from '../actions';
 import {connect} from 'react-redux';
 
-interface Props {style, navigation, game, gameTreeUpdated}
+interface Props {style, navigation, game, gameTreeUpdated, isTreeEnabled}
 
 export const MenuBar: FunctionComponent<Props> = (props: Props) => {
     const onPreviousMovePress = () => {
@@ -29,8 +29,8 @@ export const MenuBar: FunctionComponent<Props> = (props: Props) => {
     return (
         <ImageBackground resizeMode='contain' source={require('../images/bottom_buttons.png')} style={{...props.style, ...styles.buttonContainer}}>
               <TouchableOpacity style={styles.button} onPress={props.navigation.openDrawer}/>
-              <TouchableOpacity style={styles.button} onPress={onPreviousMovePress}/>
-              <TouchableOpacity style={styles.button} onPress={onNextMovePress}/>
+              <TouchableOpacity style={styles.button} onPress={props.isTreeEnabled ? onPreviousMovePress : undefined}/>
+              <TouchableOpacity style={styles.button} onPress={props.isTreeEnabled ? onNextMovePress : undefined}/>
               <TouchableOpacity style={styles.button} onPress={() => console.log("Refresh button pressed.")}/>
               <TouchableOpacity style={styles.button} onPress={() => console.log("Smiley face button pressed.")}/>
         </ImageBackground>
@@ -56,9 +56,10 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {game} = state.app;
+    const {game, isTreeEnabled} = state.app;
     return {
-        game
+        game,
+        isTreeEnabled
     };
 };
 

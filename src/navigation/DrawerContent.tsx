@@ -9,16 +9,17 @@ import {
 } from 'react-native-paper';
 import logout from "../utils/logout";
 import {connect} from "react-redux";
-
+import * as RNFS from 'react-native-fs';
+import FilenameInput from '../components/FilenameInput';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {bindActionCreators} from "redux";
-import {closeDialog, createGame, gameCreated, openDialog} from "../actions";
+import {closeDialog, createGame, gameCreated, openDialog, createAnalysis} from "../actions";
 import {getComponentBySymbol} from '../helpers/get-component';
 
-const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
+const DrawerContent = ({navigation, user, createGame, openDialog, createAnalysis, closeDialog, game}: any) => {
   const chooseClockType = (mode: string, color: string) => {
     openDialog(
       <View>
@@ -36,12 +37,12 @@ const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
             createGame({mode, color, clockType: 'fischer'});
             navigation.navigate('Home');
           }}>
-            <Text style={{fontWeight: 'bold', color: 'brown'}}>Fisher</Text>
+            <Text style={{fontWeight: 'bold', color: 'brown'}}>Fischer</Text>
           </TouchableOpacity>
         </View>
       </View>
     );
-  }
+  };
 
   const chooseConfig = (mode: string) => {
     openDialog(
@@ -74,8 +75,43 @@ const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
         </View>
       </View>
     );
-  }
+  };
   
+  const exportPGN = () => {
+    const onPress = (filename) => {
+      if (filename !== '') {
+        const contents = game.getTree().toPGN();
+        RNFS.writeFile(RNFS.DocumentDirectoryPath + '/' + filename + '.pgn', contents, 'ascii')
+          .catch(err => console.log(err));
+        closeDialog();
+      }
+    }
+    openDialog(<FilenameInput buttonText="Eksportuj" onPress={game ? onPress : undefined} style={{width: 200}}/>)
+  };
+
+  const importPGN = () => {
+    const onPress = (filename) => {
+      if (filename !== '') {
+        RNFS.readFile(RNFS.DocumentDirectoryPath + '/' + filename + '.pgn', 'ascii')
+          .then(res => {
+            closeDialog();
+            createAnalysis(res);
+            navigation.navigate('Analysis');
+          })
+          .catch(err => {
+            console.log(err);
+            openDialog(
+              <Text style={{padding: 10}}>
+                Brak takiego pliku!
+              </Text>
+            )
+          });
+      }
+    }
+    openDialog(<FilenameInput buttonText="Importuj" onPress={onPress} style={{width: 200}}/>)
+  };
+
+
   return (
       <View style={{ flex: 1 }}>
         <DrawerContentScrollView>
@@ -171,7 +207,10 @@ const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
                         />
                     )}
                     label="Analiza partii"
-                    onPress={() => {}}
+                    onPress={() => {
+                      createAnalysis();
+                      navigation.navigate('Analysis');
+                    }}
                 />
                 <DrawerItem
                     style={styles.otherOptions}
@@ -182,8 +221,20 @@ const DrawerContent = ({navigation, user, createGame, openDialog}: any) => {
                             size={size}
                         />
                     )}
-                    label="Importuj / Eksportuj"
-                    onPress={() => {}}
+                    label="Importuj"
+                    onPress={() => importPGN()}
+                />
+                <DrawerItem
+                    style={styles.otherOptions}
+                    icon={({color, size}) => (
+                        <MaterialCommunityIcon
+                            name="database-export"
+                            color={color}
+                            size={size}
+                        />
+                    )}
+                    label="Eksportuj"
+                    onPress={() => exportPGN()}
                 />
                 <DrawerItem
                     style={styles.otherOptions}
@@ -312,12 +363,13 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state: any) => {
-  const {user, isLoading, isSignout, stackLoading} = state.app;
+  const {user, isLoading, isSignout, stackLoading, game} = state.app;
   return {
     user,
     isLoading,
     isSignout,
     stackLoading,
+    game
   };
 };
 
@@ -327,6 +379,8 @@ const mapDispatchToProps = (dispatch: any) => ({
         createGame,
         gameCreated,
         openDialog,
+        closeDialog,
+        createAnalysis,
       },
       dispatch,
   ),
