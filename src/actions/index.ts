@@ -41,3 +41,20 @@ export const gameTreeUpdated = (gameTree: any) => ({
     type: 'GAME_TREE_UPDATED',
     gameTree
 });
+
+export const enableTreeMovement = () => ({
+    type: 'TREE_MOVEMENT_ENABLED'
+});
+
+export const disableTreeMovement = () => ({
+    type: 'TREE_MOVEMENT_DISABLED'
+});
+
+export const createAnalysis = (movesPGN?: string) => ({
+    type: 'NEW_ANALYSIS',
+    movesPGN
+});
+
+export const analysisCreated = () => ({
+    type: 'ANALYSIS_CREATED',
+});

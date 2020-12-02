@@ -7,16 +7,12 @@ import {
     StyleSheet,
     Dimensions,
     Text,
-    ImageBackground,
-    ScrollView,
-    TouchableOpacity,
 } from 'react-native';
-import { Subject } from 'rxjs';
 import { Game } from '../common/core/game';
 import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
 import { getMinWindowSize, getMaxWindowSize, getOrientation } from '../helpers/screen-info';
-import {closeDialog, gameCreated, openDialog, gameObjectCreated, gameTreeUpdated} from "../actions";
+import {closeDialog, gameCreated, openDialog, gameObjectCreated, gameTreeUpdated, disableTreeMovement} from "../actions";
 import {SocketPlayer} from "../common/core/socket-player";
 import {ChessButton} from "./ChessButton";
 import {ChessPlayer} from '../common/core/chess-player';
@@ -24,10 +20,13 @@ import {MobileChessboard} from './MobileChessboard';
 import ChessClockConfig from '../common/timer/chess-clock-config';
 import GameTree from './GameTree';
 import MenuBar from './MenuBar';
+import GameInfo from './GameInfo';
+import ChessClock from '../common/timer/chess-clock';
+import SplashScreen from '../navigation/SplashScreen';
 
-const config: ChessClockConfig = {
-    initMsBlack: 360 * 1000,
-    initMsWhite: 360 * 1000,
+const clockConfig: ChessClockConfig = {
+    initMsBlack: 300 * 1000,
+    initMsWhite: 300 * 1000,
     stepBlack: 1,
     stepWhite: 1,
     mode: {
@@ -40,7 +39,6 @@ const config: ChessClockConfig = {
 
 interface State {
     currentPlayer: ChessPlayer | null;
-    chessboard: Chessboard;
     size: number;
     game: any;
 }
@@ -49,7 +47,7 @@ interface Props {
     navigation: any;
     route: any;
     //actions
-    closeDialog: any; gameCreated: any; openDialog: any; gameObjectCreated: any; gameTreeUpdated: any;
+    closeDialog: any; gameCreated: any; openDialog: any; gameObjectCreated: any; gameTreeUpdated: any; disableTreeMovement: any;
     //store
     newGame: any; config: any;
 }
@@ -58,18 +56,14 @@ class GameComponent extends React.Component<Props, State> {
     color: 'white' | 'black';
     ws: WebSocket;
     mode: 'onlineGame' | 'twoPlayers' | 'singleGame';
-    clearBoard: Subject<void> = new Subject<void>()
 
     constructor(props: any) {
         super(props);
 
-        let chessboard = new Chessboard();
-
         this.state = {
-            currentPlayer: null,
-            chessboard: chessboard,
+            currentPlayer: undefined,
             size: getMinWindowSize(),
-            game: null
+            game: undefined,
         };
 
         Dimensions.addEventListener('change', () => this.setState({ size: getMinWindowSize() }));
@@ -77,7 +71,7 @@ class GameComponent extends React.Component<Props, State> {
 
     componentDidMount() {
         this.mode = 'twoPlayers';
-        this.newGame();
+        this.newGame(undefined, 'standard');
     }
 
     componentDidUpdate() {
@@ -88,22 +82,21 @@ class GameComponent extends React.Component<Props, State> {
         }
     }
 
-    newGame(newColor?: string) {
-        this.clearBoard.next();
+    newGame(newColor?: string, newClockType?: string) {
         if (this.mode === 'onlineGame') {
-            this.newOnlineGame(newColor || this.props.config.color);
+            this.newOnlineGame(newColor || this.props.config.color, newClockType || this.props.config.clockType);
         }
         else if (this.mode === 'twoPlayers') {
             this.color = 'white'
-            this.init(new ChessPlayer());
+            this.init(new ChessPlayer(), newClockType || this.props.config.clockType);
         }
         else if (this.mode === 'singleGame') {
             this.color = 'white'
-            this.newOnlineAiGame(newColor || this.props.config.color);
+            this.newOnlineAiGame(newColor || this.props.config.color, newClockType || this.props.config.clockType);
         }
     }
 
-    newOnlineGame(color: string) {
+    newOnlineGame(color: string, clockType: string) {
         this.props.openDialog(
             <Text>
                 Oczekiwanie na przeciwnika...
@@ -129,12 +122,12 @@ class GameComponent extends React.Component<Props, State> {
             if (msg.type === 'config') {
                 this.props.closeDialog();
                 this.color = msg.color;
-                this.init(new SocketPlayer(this.ws));
+                this.init(new SocketPlayer(this.ws), clockType);
             }
         };
     }
 
-    newOnlineAiGame(color: string) {
+    newOnlineAiGame(color: string, clockType: string) {
         this.props.openDialog(
             <Text>
                 Oczekiwanie na połączenie...
@@ -160,13 +153,14 @@ class GameComponent extends React.Component<Props, State> {
             if (msg.type === 'config') {
                 this.props.closeDialog();
                 this.color = msg.color;
-                this.init(new SocketPlayer(this.ws));
+                this.init(new SocketPlayer(this.ws), clockType);
             }
         };
     }
 
-    init(opponent: Player) {
+    init(opponent: Player, clockType: string) {
         console.log('init')
+        let chessboard = new Chessboard();
         let game = new Game();
         game.event.subscribe((event: any) => {
             if (event.type === 'mate') {
@@ -184,13 +178,23 @@ class GameComponent extends React.Component<Props, State> {
             wp = opponent;
             bp = me;
         }
-        game.init({canvas: this.state.chessboard, whitePlayer: wp, blackPlayer: bp, chessClockConfig: config});
+        clockConfig.endCallback = (winner: string) => {
+            this.onEndGame(winner);
+        }
+        clockConfig.mode = {
+            type: clockType ? clockType : 'standard',
+            toAdd: 5000
+        }
+        let chessClock = new ChessClock(clockConfig);
+        game.init({canvas: chessboard, whitePlayer: wp, blackPlayer: bp, chessClock});
 
         this.props.gameObjectCreated(game);
+        this.props.disableTreeMovement();
+        console.log('disabling tree movement')
         this.props.gameTreeUpdated(game.getTree().toSerializable());
         this.setState({
             currentPlayer: me,
-            game
+            game,
         });
     }
 
@@ -216,10 +220,9 @@ class GameComponent extends React.Component<Props, State> {
 
     render() {
         const {
-            chessboard,
             currentPlayer,
             game,
-            size
+            size,
         } = this.state;
 
         const onMove = (move: string) => {
@@ -234,42 +237,35 @@ class GameComponent extends React.Component<Props, State> {
                     game.blackPlayer.move(move);
                     this.color = 'white';
                 }
-                this.props.gameTreeUpdated(game.getTree().toSerializable());
             }
             this.props.gameTreeUpdated(game.getTree().toSerializable());
         };
 
         const remainingSpace = getMaxWindowSize() - getMinWindowSize();
         return (
-            <View style={styles.container}>
-                <StatusBar hidden />
-                <GameTree style={{ height: 0.6 * remainingSpace, width: size }}/>
-                <MobileChessboard
-                    clearBoard={this.clearBoard}
-                    turn={this.color}
-                    mode={this.mode}
-                    style={{ height: size, width: size }}
-                    chessboard={chessboard}
-                    onMove={onMove}
-                />
-                <MenuBar
-                    style={{height: 0.17 * remainingSpace, width: size}}
-                    navigation={this.props.navigation}
-                />
-
-                <View style={{ height: 0.23 * remainingSpace, width: size, ...styles.playerInfo }}>
-                    <View style={styles.timersContainer}>
-                        <Text style={styles.timer}> 05:00 </Text>
-                        <Text style={styles.timer}> 05:00 </Text>
-                    </View>
-                    <View style={styles.playerContainer}>
-                        <View style={styles.whiteBox}/>
-                        <Text style={styles.player}>Player 1</Text>
-                        <Text style={styles.player}>Player 2</Text>
-                        <View style={styles.blackBox}/>
-                    </View>
+            <>
+            { 
+                game ? (
+                    <View style={styles.container}>
+                    <StatusBar hidden />
+                    <GameTree style={{ height: 0.6 * remainingSpace, width: size }}/>
+                    <MobileChessboard
+                        turn={this.color}
+                        mode={this.mode}
+                        style={{ height: size, width: size }}
+                        chessboard={game.getChessboard()}
+                        onMove={onMove}
+                    />
+                    <MenuBar
+                        style={{height: 0.17 * remainingSpace, width: size}}
+                        navigation={this.props.navigation}
+                    />
+                    <GameInfo style={{ height: 0.23 * remainingSpace, width: size }}/>
                 </View>
-            </View>
+                ) : (
+                    <SplashScreen style={{height: '100%', width: '100%'}}/>
+                )}
+            </>
         );
     }
 }
@@ -287,52 +283,6 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         fontSize: 16
     },
-    playerInfo: {
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignContent: 'center',
-        backgroundColor: '#fff3ccbb',
-        padding: 5
-    },
-    timersContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignContent: 'center',
-    },
-    timer: {
-        color: '#707070',
-        fontWeight: 'bold',
-        fontSize: 18
-    },
-    text: {
-        color: '#707070',
-        fontFamily: 'SegoeUI-Bold',
-    },
-    playerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    player: {
-        color: '#707070',
-        fontFamily: 'SegoeUI-Bold',
-        fontSize: 15,
-    },
-    blackBox: {
-        borderColor: '#96031caa',
-        borderWidth: 2,
-        height: 25,
-        width: 24,
-        backgroundColor: '#434343'
-    },
-    whiteBox: {
-        borderColor: '#96031caa',
-        borderWidth: 2,
-        height: 25,
-        width: 25,
-        backgroundColor: '#d9d9d9'
-    }
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
@@ -342,7 +292,8 @@ const mapDispatchToProps = (dispatch: any) => ({
             closeDialog,
             gameCreated,
             gameObjectCreated,
-            gameTreeUpdated
+            gameTreeUpdated,
+            disableTreeMovement
         },
         dispatch,
     ),

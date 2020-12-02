@@ -1,13 +1,12 @@
 import React from 'react';
 import { useEffect, useState, FunctionComponent } from 'react';
-import { View, StyleSheet, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { Chessboard } from '../common/core/chessboard';
 import { BoardInfo } from '../common/core/board-info';
 import { Piece } from '../common/pieces/piece';
 import { Move } from '../common/pieces/move'
 import { getComponent } from '../helpers/get-component';
 import { PromotionDialog } from './PromotionDialog';
-import {Subject} from "rxjs";
 
 
 interface Props {
@@ -15,10 +14,8 @@ interface Props {
     onMove: (move: string) => void;
     style: any;
     turn: string;
-    clearBoard: Subject<void>;
     mode: 'singleGame' | 'onlineGame' | 'twoPlayers';
 }
-
 
 interface LastMove {
     previousPosition: {
@@ -28,12 +25,10 @@ interface LastMove {
     move: Move
 }
 
-
 interface FirstPress {
     piece: Piece;
     possibleMoves: Move[];
 }
-
 
 const generateGridItems = (boardInfo: BoardInfo, onPress: Function, firstPress: FirstPress | undefined, lastMove: LastMove | undefined) => {
     let items: any[] = [];
@@ -68,8 +63,7 @@ const generateGridItems = (boardInfo: BoardInfo, onPress: Function, firstPress: 
 
 
 export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
-    const [positionFEN, setPositionFEN] = useState(props.chessboard.positionFEN);
-    const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(positionFEN));
+    const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(props.chessboard.positionFEN));
     const [firstPress, setFirstPress] = useState<FirstPress>();
     const [lastMove, setLastMove] = useState<LastMove>();
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -77,23 +71,23 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
 
     useEffect(() => {
         props.chessboard.callback = (newPosition) => {
-            setPositionFEN(newPosition);
             setBoardInfo(new BoardInfo().fromFEN(newPosition));
             setFirstPress(undefined);
             setLastMove(undefined);
         };
-    });
+    })
 
     useEffect(() => {
-        // props.clearBoard.subscribe(() => {
-        //     setFirstPress(undefined);
-        //     setLastMove(undefined);
-        // });
-        // return props.clearBoard.unsubscribe;
-    }, []);
+        setBoardInfo(new BoardInfo().fromFEN(props.chessboard.positionFEN));
+    }, [props.chessboard.positionFEN]);
+
+    useEffect(() => {
+        setFirstPress(undefined);
+        setLastMove(undefined);
+    }, [props.chessboard]);
     
     const onPress = (piece: Piece, row: number, column: number) => {
-        if ((props.mode === 'onlineGame' || props.mode === 'singleGame') && piece !== undefined && props.turn !== piece.color) {
+        if (firstPress === undefined && (props.mode === 'onlineGame' || props.mode === 'singleGame') && piece !== undefined && props.turn !== piece.color) {
             return;
         }
         if (piece === firstPress?.piece) {

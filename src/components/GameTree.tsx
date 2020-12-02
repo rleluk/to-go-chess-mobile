@@ -6,9 +6,9 @@ import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 import { black } from 'react-native-paper/lib/typescript/src/styles/colors';
 
-interface Props {game, gameTree, style, gameTreeUpdated}
+interface Props {game, gameTree, style, gameTreeUpdated, isTreeEnabled}
 
-const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
+const generateItems = (game, gameTree: any, gameTreeUpdated: any, isTreeEnabled: boolean) => {
     let items: any[] = [];
     
     const onClick = (node) => {
@@ -71,7 +71,7 @@ const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
             let isLeaf = node === game.getTree().leaf;
             let style = isMain ? (isLeaf ? styles.Leaf : styles.TreeNode) : (isLeaf ? styles.SubLeaf : styles.SubTreeNode);
             result.push(
-                <TouchableOpacity key={node.positionFEN + Math.random()} style={style} onPress={() => onClick(node)}>
+                <TouchableOpacity key={node.positionFEN + Math.random()} style={style} onPress={isTreeEnabled ? () => onClick(node) : undefined}>
                     <Text style={{textAlign: 'center'}}>
                         {node.move}
                     </Text>
@@ -88,10 +88,10 @@ const generateItems = (game, gameTree: any, gameTreeUpdated: any) => {
 }
 
 export const GameTree: FunctionComponent<Props> = (props: Props) => {
-    const {gameTree, game, gameTreeUpdated} = props;
+    const {gameTree, game, gameTreeUpdated, isTreeEnabled} = props;
 
     if (gameTree !== undefined && game !== undefined) {
-        var items = generateItems(game, gameTree, gameTreeUpdated);
+        var items = generateItems(game, gameTree, gameTreeUpdated, isTreeEnabled);
     }
 
     return (
@@ -200,10 +200,11 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {game, gameTree} = state.app;
+    const {game, gameTree, isTreeEnabled} = state.app;
     return {
         game, 
-        gameTree
+        gameTree,
+        isTreeEnabled
     };
 };
 
