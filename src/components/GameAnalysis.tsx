@@ -19,13 +19,6 @@ import GameTree from './GameTree';
 import MenuBar from './MenuBar';
 import SplashScreen from '../navigation/SplashScreen';
 
-// mock clock
-class ChessClock {
-    startCountdown = () => {}
-    switchClock = () => {}
-    stopCountdown = () => {}
-    getTimes = () => {}
-};
 
 interface State {
     size: number;
@@ -57,27 +50,19 @@ class GameAnalysis extends React.Component<Props, State> {
 
     componentDidMount() {
         if (this.props.newAnalysis) {
-            if (this.props.movesPGN) {
-                this.importGame(this.props.movesPGN);
-            } else {
-                this.newGame();
-            }
+            this.newGame(this.props.movesPGN);
             this.props.analysisCreated();
         }
     }
 
     componentDidUpdate() {
         if (this.props.newAnalysis) {
-            if (this.props.movesPGN) {
-                this.importGame(this.props.movesPGN);
-            } else {
-                this.newGame();
-            }
+            this.newGame(this.props.movesPGN);
             this.props.analysisCreated();
         }
     }
 
-    importGame(moves) {
+    newGame(moves?: string) {
         console.log('importing game...')
         let chessboard = new Chessboard();
         let game = new Game();
@@ -88,46 +73,25 @@ class GameAnalysis extends React.Component<Props, State> {
         });
         const wp = new ChessPlayer();
         const bp = new ChessPlayer();
-        let chessClock = new ChessClock();
-        game.init({canvas: chessboard, whitePlayer: wp, blackPlayer: bp, chessClock});
+        game.init({canvas: chessboard, whitePlayer: wp, blackPlayer: bp, chessClockConfig: undefined});
 
-        const movesArr = moves.split(' ');
-        let turn = 3;
-        for(let i = 0; i < movesArr.length; i++) {
-            if (!(turn % 3)) {
-                turn = 1;
-                continue;
+        if (moves) {
+            const movesArr = moves.split(' ');
+            let turn = 3;
+            for(let i = 0; i < movesArr.length; i++) {
+                if (!(turn % 3)) {
+                    turn = 1;
+                    continue;
+                }
+                if (turn === 1) {
+                    wp.move(movesArr[i]);
+                } 
+                else if (turn === 2) {
+                    bp.move(movesArr[i]);
+                }
+                turn++;
             }
-            if (turn === 1) {
-                wp.move(movesArr[i]);
-            } 
-            else if (turn === 2) {
-                bp.move(movesArr[i]);
-            }
-            turn++;
         }
-
-        this.props.gameObjectCreated(game);
-        this.props.enableTreeMovement();
-        this.props.gameTreeUpdated(game.getTree().toSerializable());
-        this.setState({
-            game,
-        });
-    }
-
-    newGame() {
-        console.log('initializing new game...')
-        let chessboard = new Chessboard();
-        let game = new Game();
-        game.event.subscribe((event: any) => {
-            if (event.type === 'mate') {
-                this.onEndGame(event.data)
-            }
-        });
-        const wp = new ChessPlayer();
-        const bp = new ChessPlayer();
-        let chessClock = new ChessClock();
-        game.init({canvas: chessboard, whitePlayer: wp, blackPlayer: bp, chessClock});
 
         this.props.gameObjectCreated(game);
         this.props.enableTreeMovement();

@@ -21,7 +21,6 @@ import ChessClockConfig from '../common/timer/chess-clock-config';
 import GameTree from './GameTree';
 import MenuBar from './MenuBar';
 import GameInfo from './GameInfo';
-import ChessClock from '../common/timer/chess-clock';
 import SplashScreen from '../navigation/SplashScreen';
 
 const clockConfig: ChessClockConfig = {
@@ -185,8 +184,7 @@ class GameComponent extends React.Component<Props, State> {
             type: clockType ? clockType : 'standard',
             toAdd: 5000
         }
-        let chessClock = new ChessClock(clockConfig);
-        game.init({canvas: chessboard, whitePlayer: wp, blackPlayer: bp, chessClock});
+        game.init({canvas: chessboard, whitePlayer: wp, blackPlayer: bp, chessClockConfig: clockConfig});
 
         this.props.gameObjectCreated(game);
         this.props.disableTreeMovement();
