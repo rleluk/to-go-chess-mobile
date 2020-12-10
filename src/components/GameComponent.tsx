@@ -12,7 +12,15 @@ import { Game } from '../common/core/game';
 import { Chessboard } from '../common/core/chessboard';
 import { Player } from '../common/interfaces/player';
 import { getMinWindowSize, getMaxWindowSize, getOrientation } from '../helpers/screen-info';
-import {closeDialog, gameCreated, openDialog, gameObjectCreated, gameTreeUpdated, disableTreeMovement} from "../actions";
+import {
+    closeDialog,
+    gameCreated,
+    openDialog,
+    gameObjectCreated,
+    gameTreeUpdated,
+    disableTreeMovement,
+    openToast, closeToast, gameInProgress
+} from "../actions";
 import {SocketPlayer} from "../common/core/socket-player";
 import {ChessButton} from "./ChessButton";
 import {ChessPlayer} from '../common/core/chess-player';
@@ -46,15 +54,17 @@ interface Props {
     navigation: any;
     route: any;
     //actions
-    closeDialog: any; gameCreated: any; openDialog: any; gameObjectCreated: any; gameTreeUpdated: any; disableTreeMovement: any;
+    closeDialog: any; gameCreated: any; openDialog: any; gameObjectCreated: any; gameTreeUpdated: any; disableTreeMovement: any; openToast: any; closeToast: any; gameInProgress: any;
     //store
-    newGame: any; config: any;
+    newGame: any; config: any; status: any;
 }
 
 class GameComponent extends React.Component<Props, State> {
     color: 'white' | 'black';
     ws: WebSocket;
     mode: 'onlineGame' | 'twoPlayers' | 'singleGame';
+    me: ChessPlayer;
+    opponentDraw: boolean = false;
 
     constructor(props: any) {
         super(props);
@@ -73,15 +83,27 @@ class GameComponent extends React.Component<Props, State> {
         this.newGame(undefined, 'standard');
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps:Readonly<Props>) {
         if (this.props.newGame) {
             this.mode = this.props.config.mode;
             this.newGame();
             this.props.gameCreated();
         }
+        if (prevProps.status !== 'drawOffered' && this.props.status === 'drawOffered') {
+            this.me.move('draw');
+        }
+        if (prevProps.status === 'drawOffered' && this.props.status !== 'drawOffered') {
+            this.props.closeToast();
+        }
+        if (prevProps.status !== 'surrendered' && this.props.status === 'surrendered') {
+            this.me.move('surrender');
+        }
     }
 
     newGame(newColor?: string, newClockType?: string) {
+        if (this.props.status !== 'inProgress') {
+            this.props.gameInProgress();
+        }
         if (this.mode === 'onlineGame') {
             this.newOnlineGame(newColor || this.props.config.color, newClockType || this.props.config.clockType);
         }
@@ -96,6 +118,10 @@ class GameComponent extends React.Component<Props, State> {
     }
 
     newOnlineGame(color: string, clockType: string) {
+        if (this.opponentDraw) {
+            this.opponentDraw = false;
+            this.props.closeToast();
+        }
         this.props.openDialog(
             <Text>
                 Oczekiwanie na przeciwnika...
@@ -165,8 +191,32 @@ class GameComponent extends React.Component<Props, State> {
             if (event.type === 'mate') {
                 this.onEndGame(event.data)
             }
+            else if (event.type === 'draw') {
+                this.onEndGame('draw');
+            }
+            else if (event.type === 'draw_offer' && this.me.color !== event.data) {
+                this.opponentDraw = true;
+                this.props.openToast(
+                    <View>
+                        <Text>Przeciwnik proponuje remis.</Text>
+                        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+                            <ChessButton onPress={() => {
+                                console.log('draw')
+                                this.me.move('draw');
+                                this.props.closeToast();
+                            }}
+                                         title={'Akceptuj'} />
+                            <ChessButton onPress={() => this.props.closeToast()} title={'Odrzuć'} />
+                        </View>
+                    </View>
+                );
+            }
+            else if (event.type === 'surrender') {
+                this.onEndGame(this.me.color === event.data ? 'me_surrender' : 'opponent_surrender');
+            }
         });
-        const me = new ChessPlayer();
+        this.me = new ChessPlayer();
+        const me = this.me;
         let wp;
         let bp;
         if (this.color === 'white') {
@@ -200,9 +250,11 @@ class GameComponent extends React.Component<Props, State> {
         this.props.openDialog(
             <View>
                 <Text style={{textAlign: 'center'}}>
-                    {status === 'draw' && 'Remis'}
+                    {status === 'draw' && 'Partia zakończona remisem'}
                     {status === 'white' && 'Wygrywają białe'}
                     {status === 'black' && 'Wygrywają czarne'}
+                    {status === 'me_surrender' && 'Poddałeś się'}
+                    {status === 'opponent_surrender' && 'Przeciwnik się poddał'}
                 </Text>
                 <ChessButton
                     onPress={() => {
@@ -224,6 +276,13 @@ class GameComponent extends React.Component<Props, State> {
         } = this.state;
 
         const onMove = (move: string) => {
+            if (this.opponentDraw) {
+                this.opponentDraw = false;
+                this.props.closeToast();
+            }
+            if (this.props.status !== 'inProgress') {
+                this.props.gameInProgress();
+            }
             if (this.mode === 'onlineGame' || this.mode === 'singleGame') {
                 currentPlayer.move(move);
             }
@@ -291,17 +350,21 @@ const mapDispatchToProps = (dispatch: any) => ({
             gameCreated,
             gameObjectCreated,
             gameTreeUpdated,
-            disableTreeMovement
+            disableTreeMovement,
+            openToast,
+            closeToast,
+            gameInProgress,
         },
         dispatch,
     ),
 });
 
 const mapStateToProps = (state: any) => {
-    const {config, newGame} = state.app;
+    const {config, newGame, status} = state.app;
     return {
         config,
         newGame,
+        status,
     };
 };
 

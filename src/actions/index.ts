@@ -23,6 +23,15 @@ export const closeDialog = () => ({
     type: 'CLOSE_DIALOG',
 });
 
+export const openToast = (content: any) => ({
+    type: 'OPEN_TOAST',
+    content,
+});
+
+export const closeToast = () => ({
+    type: 'CLOSE_TOAST',
+});
+
 export const createGame = (config: any) => ({
     type: 'NEW_GAME',
     config
@@ -57,4 +66,16 @@ export const createAnalysis = (movesPGN?: string) => ({
 
 export const analysisCreated = () => ({
     type: 'ANALYSIS_CREATED',
+});
+
+export const drawOffer = () => ({
+    type: 'DRAW_OFFERED',
+});
+
+export const surrender = () => ({
+    type: 'SURRENDERED',
+});
+
+export const gameInProgress = () => ({
+    type: 'GAME_IN_PROGRESS',
 });

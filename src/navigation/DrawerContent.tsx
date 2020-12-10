@@ -16,10 +16,10 @@ import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {bindActionCreators} from "redux";
-import {closeDialog, createGame, gameCreated, openDialog, createAnalysis} from "../actions";
+import {closeDialog, createGame, gameCreated, openDialog, createAnalysis, drawOffer, surrender} from "../actions";
 import {getComponentBySymbol} from '../helpers/get-component';
 
-const DrawerContent = ({navigation, user, createGame, openDialog, createAnalysis, closeDialog, game}: any) => {
+const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, surrender, createAnalysis, closeDialog, game, config}: any) => {
   const chooseClockType = (mode: string, color: string) => {
     openDialog(
       <View>
@@ -126,6 +126,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, createAnalysis
               </View>
             </View>
             <Drawer.Section>
+              {(config && config.mode === 'onlineGame') &&
               <View style={styles.drawerSection}>
                 <DrawerItem
                     style={styles.inGameOptions}
@@ -137,7 +138,10 @@ const DrawerContent = ({navigation, user, createGame, openDialog, createAnalysis
                         />
                     )}
                     label="Zaproponuj remis"
-                    onPress={() => {}}
+                    onPress={() => {
+                      drawOffer();
+                      navigation.navigate('Home');
+                    }}
                 />
                 <DrawerItem
                     style={styles.inGameOptions}
@@ -149,9 +153,12 @@ const DrawerContent = ({navigation, user, createGame, openDialog, createAnalysis
                         />
                     )}
                     label="Poddaj się"
-                    onPress={() => {}}
+                    onPress={() => {
+                      surrender();
+                      navigation.navigate('Home');
+                    }}
                 />
-              </View>
+              </View>}
               <View style={styles.drawerSection}>
                 <DrawerItem
                     style={styles.newGameOptions}
@@ -363,13 +370,14 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state: any) => {
-  const {user, isLoading, isSignout, stackLoading, game} = state.app;
+  const {user, isLoading, isSignout, stackLoading, game, config} = state.app;
   return {
     user,
     isLoading,
     isSignout,
     stackLoading,
-    game
+    game,
+    config
   };
 };
 
@@ -381,6 +389,8 @@ const mapDispatchToProps = (dispatch: any) => ({
         openDialog,
         closeDialog,
         createAnalysis,
+        drawOffer,
+        surrender,
       },
       dispatch,
   ),
