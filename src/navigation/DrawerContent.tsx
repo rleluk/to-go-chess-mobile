@@ -1,5 +1,5 @@
-import React from 'react';
-import {View, StyleSheet, Text, Button, TouchableOpacity} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, StyleSheet, Text, Button, TouchableOpacity, TextInput, ScrollView} from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import {
   Avatar,
@@ -18,6 +18,8 @@ import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIc
 import {bindActionCreators} from "redux";
 import {closeDialog, createGame, gameCreated, openDialog, createAnalysis, drawOffer, surrender} from "../actions";
 import {getComponentBySymbol} from '../helpers/get-component';
+import firestore from '@react-native-firebase/firestore';
+import {ChessButton} from "../components/ChessButton";
 
 const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, surrender, createAnalysis, closeDialog, game, config}: any) => {
   const chooseClockType = (mode: string, color: string) => {
@@ -78,18 +80,75 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
   };
   
   const exportPGN = () => {
-    const onPress = (filename) => {
-      if (filename !== '') {
-        const contents = game.getTree().toPGN();
-        RNFS.writeFile(RNFS.DocumentDirectoryPath + '/' + filename + '.pgn', contents, 'ascii')
-          .catch(err => console.log(err));
-        closeDialog();
+    const contents = game.getTree().toPGN();
+    if (contents) {
+      let refInput;
+      const placeholder = 'Brak nazwy';
+      const db = firestore();
+      const onPress = (filename) => {
+        if (filename !== '') {
+          RNFS.writeFile(RNFS.DocumentDirectoryPath + '/' + filename + '.pgn', contents, 'ascii')
+              .catch(err => console.log(err));
+          closeDialog();
+        }
       }
+      openDialog(
+          <>
+            {user ?
+                <>
+                  <TextInput placeholder={placeholder} onChangeText={text => refInput = text}/>
+                  <ChessButton onPress={() => {
+                    console.log(refInput)
+                    db.collection('users').doc(user.uid).collection('games').add({
+                      name: refInput ? refInput : placeholder,
+                      pgn: contents
+                    }).then(() => {
+                      openDialog(<Text>Pomyślnie zapisaono partię</Text>);
+                    }).catch(() => {
+                      openDialog(<Text>Błąd, nie udało się zapisać partii</Text>);
+                    });
+                    openDialog(<Text>Zapisywanie...</Text>);
+                  }}
+                  title={'Zapisz na koncie'}/>
+                </>
+                : <Text>Zaloguj się aby zapisać dane na koncie</Text>
+            }
+            <FilenameInput buttonText="Zapisz w pamięci" onPress={game ? onPress : undefined} style={{width: 200}}/>
+          </>
+      );
     }
-    openDialog(<FilenameInput buttonText="Eksportuj" onPress={game ? onPress : undefined} style={{width: 200}}/>)
+    else {
+      openDialog(<Text>Brak danych do wyeksportowania</Text>);
+    }
   };
 
   const importPGN = () => {
+    const db = firestore();
+    const List = () => {
+      const [list, setList] = useState([])
+      const [isLoading, setIsLoading] = useState(true)
+      useEffect(() => {
+        const array = [];
+        db.collection('users').doc(user.uid).collection('games').get().then(function (querySnapshot) {
+          querySnapshot.forEach(function (doc) {
+            const {name, pgn} = doc.data();
+            array.push(
+                <View key={doc.id} style={{flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#707070'}}>
+                  <View style={{flexGrow: 1, maxWidth: 230}}><Text style={{flex: 1, fontWeight: "bold", flexWrap: 'wrap'}}>{name}</Text></View>
+                  <ChessButton onPress={() => {
+                    closeDialog();
+                    createAnalysis(pgn);
+                    navigation.navigate('Analysis');
+                  }} title={'Wczytaj'}/>
+                </View>
+            );
+          })
+          setList(array);
+          setIsLoading(false);
+        });
+      }, []);
+      return <>{isLoading ? <Text>Ładowanie...</Text> : <ScrollView style={{maxHeight: 350, maxWidth: 300}}>{list}</ScrollView>}</>
+    };
     const onPress = (filename) => {
       if (filename !== '') {
         RNFS.readFile(RNFS.DocumentDirectoryPath + '/' + filename + '.pgn', 'ascii')
@@ -108,7 +167,17 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
           });
       }
     }
-    openDialog(<FilenameInput buttonText="Importuj" onPress={onPress} style={{width: 200}}/>)
+    openDialog(
+        <>
+          {user ?
+              <>
+                <List />
+              </>
+              : <Text>Zaloguj się aby wczytać zapisane partie</Text>
+          }
+        <FilenameInput buttonText="Importuj z pamięci" onPress={onPress} style={{width: 200}}/>
+        </>
+        );
   };
 
 
