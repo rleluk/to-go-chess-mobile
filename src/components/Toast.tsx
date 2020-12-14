@@ -1,15 +1,47 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from "redux";
 import {closeToast} from "../actions";
 import {StyleSheet, View, Text, TouchableOpacity} from "react-native";
 
+let timeOut;
+let interval;
+
 const Toast = (props) => {
     if (!props.toast || !props.toast.content) {
         return <></>
     }
+    const [opacity, setOpacity] = useState(1);
+    useEffect(() => {
+        if (timeOut) {
+            clearTimeout(timeOut);
+        }
+        if (interval) {
+            clearInterval(interval);
+        }
+        const options = props.toast.options;
+        if (options) {
+            if (options.fade) {
+                setOpacity(1);
+                timeOut = setTimeout(() => {
+                    const ms = 16;
+                    const fadeTime = 500;
+                    let value = 1;
+                    interval = setInterval(() => {
+                        if (value - ms / fadeTime < 0) {
+                            clearInterval(interval);
+                            props.closeToast();
+                        } else {
+                            value = value - ms / fadeTime;
+                            setOpacity(value);
+                        }
+                    }, ms);
+                }, 2500);
+            }
+        }
+    }, [props.toast]);
     return (
-        <View style={styles.toast}>
+        <View style={{...styles.toast, opacity}}>
             {props.toast.content}
         </View>
     );

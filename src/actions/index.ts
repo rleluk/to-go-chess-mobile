@@ -23,9 +23,10 @@ export const closeDialog = () => ({
     type: 'CLOSE_DIALOG',
 });
 
-export const openToast = (content: any) => ({
+export const openToast = (content: any, options?: any) => ({
     type: 'OPEN_TOAST',
     content,
+    options,
 });
 
 export const closeToast = () => ({
@@ -78,4 +79,13 @@ export const surrender = () => ({
 
 export const gameInProgress = () => ({
     type: 'GAME_IN_PROGRESS',
+});
+
+export const sendEmote = (index) => ({
+    type: 'SEND_EMOTE',
+    index
+});
+
+export const emoteSent = () => ({
+    type: 'EMOTE_SENT'
 });

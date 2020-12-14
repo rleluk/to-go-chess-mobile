@@ -6,7 +6,7 @@ import {
     StatusBar,
     StyleSheet,
     Dimensions,
-    Text,
+    Text, Image,
 } from 'react-native';
 import { Game } from '../common/core/game';
 import { Chessboard } from '../common/core/chessboard';
@@ -19,7 +19,7 @@ import {
     gameObjectCreated,
     gameTreeUpdated,
     disableTreeMovement,
-    openToast, closeToast, gameInProgress
+    openToast, closeToast, gameInProgress, emoteSent
 } from "../actions";
 import {SocketPlayer} from "../common/core/socket-player";
 import {ChessButton} from "./ChessButton";
@@ -30,6 +30,7 @@ import GameTree from './GameTree';
 import MenuBar from './MenuBar';
 import GameInfo from './GameInfo';
 import SplashScreen from '../navigation/SplashScreen';
+import emotes from "../utils/emotes";
 
 const clockConfig: ChessClockConfig = {
     initMsBlack: 300 * 1000,
@@ -54,9 +55,10 @@ interface Props {
     navigation: any;
     route: any;
     //actions
-    closeDialog: any; gameCreated: any; openDialog: any; gameObjectCreated: any; gameTreeUpdated: any; disableTreeMovement: any; openToast: any; closeToast: any; gameInProgress: any;
+    closeDialog: any; gameCreated: any; openDialog: any; gameObjectCreated: any; gameTreeUpdated: any; disableTreeMovement: any;
+    openToast: any; closeToast: any; gameInProgress: any; emoteSent: any;
     //store
-    newGame: any; config: any; status: any;
+    newGame: any; config: any; status: any, emoteToSend: any;
 }
 
 class GameComponent extends React.Component<Props, State> {
@@ -98,6 +100,12 @@ class GameComponent extends React.Component<Props, State> {
         if (prevProps.status !== 'surrendered' && this.props.status === 'surrendered') {
             this.me.move('surrender');
         }
+        if (this.props.emoteToSend !== undefined) {
+            if (this.ws) {
+                this.ws.send(JSON.stringify({type: 'emote', emote: this.props.emoteToSend}));
+            }
+            this.props.emoteSent();
+        }
     }
 
     newGame(newColor?: string, newClockType?: string) {
@@ -133,11 +141,13 @@ class GameComponent extends React.Component<Props, State> {
         this.ws = new WebSocket('ws://to-go-chess-sockets.herokuapp.com/')
         this.ws.onerror = (event) => {
             console.log(event)
-            this.props.openDialog(
-                <Text>
-                    Błąd połączenia...
-                </Text>
-            )
+            if (event.message) {
+                this.props.openDialog(
+                    <Text>
+                        Błąd połączenia...
+                    </Text>
+                )
+            }
         }
         this.ws.onopen = () => {
             this.ws.send(JSON.stringify({type: 'newGame', color}));
@@ -148,6 +158,19 @@ class GameComponent extends React.Component<Props, State> {
                 this.props.closeDialog();
                 this.color = msg.color;
                 this.init(new SocketPlayer(this.ws), clockType);
+                /****  DANGEROUS  ******/
+                const socketOnMessage = this.ws.onmessage;
+                this.ws.onmessage = (event) => {
+                    socketOnMessage.call(this.ws, event);
+                    let msg = JSON.parse(String(event.data));
+                    if (msg.type === 'emote') {
+                        const emote = emotes.find(emote => emote.index === msg.emote);
+                        if (emote) {
+                            this.props.openToast(<Image  source={emote.res} style={{width: 60, height: 60}} />, {fade: true});
+                        }
+                    }
+                }
+                /********** ********/
             }
         };
     }
@@ -164,11 +187,13 @@ class GameComponent extends React.Component<Props, State> {
         this.ws = new WebSocket('ws://to-go-chess-sockets.herokuapp.com/')
         this.ws.onerror = (event) => {
             console.log(event)
-            this.props.openDialog(
-                <Text>
-                    Błąd połączenia...
-                </Text>
-            )
+            if (event.message) {
+                this.props.openDialog(
+                    <Text>
+                        Błąd połączenia...
+                    </Text>
+                )
+            }
         }
         this.ws.onopen = () => {
             this.ws.send(JSON.stringify({type: 'newAiGame', color}));
@@ -217,6 +242,21 @@ class GameComponent extends React.Component<Props, State> {
         });
         this.me = new ChessPlayer();
         const me = this.me;
+
+        /****  DANGEROUS  ******/
+        const superReceiveMove = me.receiveMove;
+        me.receiveMove = (move: string) => {
+            superReceiveMove(move);
+            if (this.opponentDraw) {
+                this.opponentDraw = false;
+                this.props.closeToast();
+            }
+            if (this.props.status !== 'inProgress') {
+                this.props.gameInProgress();
+            }
+        }
+        /********** ********/
+
         let wp;
         let bp;
         if (this.color === 'white') {
@@ -354,17 +394,19 @@ const mapDispatchToProps = (dispatch: any) => ({
             openToast,
             closeToast,
             gameInProgress,
+            emoteSent,
         },
         dispatch,
     ),
 });
 
 const mapStateToProps = (state: any) => {
-    const {config, newGame, status} = state.app;
+    const {config, newGame, status, emoteToSend} = state.app;
     return {
         config,
         newGame,
         status,
+        emoteToSend,
     };
 };
 

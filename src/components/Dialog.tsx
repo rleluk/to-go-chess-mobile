@@ -43,7 +43,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderColor: 'black',
-        borderWidth: 2
+        borderWidth: 2,
+        position: 'relative',
     },
     closeButton: {
         position: 'absolute',
