@@ -13,6 +13,7 @@ import DrawerContent from './src/navigation/DrawerContent';
 import SignUpScreen from './src/navigation/SignUpScreen';
 import SignInScreen from './src/navigation/SignInScreen';
 import AnalysisScreen from './src/navigation/AnalysisScreen';
+import SettingsScreen from './src/navigation/SettingsScreen';
 
 import {restoreUser} from "./src/actions";
 
@@ -53,8 +54,9 @@ function App(props: any) {
                 />) : (<>
                     <Drawer.Screen name="Analysis" component={AnalysisScreen} options={{headerShown: false}}/>
                     <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
-                    <Drawer.Screen name="Sign up" component={SignUpScreen} />
-                    <Drawer.Screen name="Sign in" component={SignInScreen} />
+                    <Drawer.Screen name="Sign up" component={SignUpScreen} options={{headerTitle: "Rejestracja"}}/>
+                    <Drawer.Screen name="Sign in" component={SignInScreen} options={{headerTitle: "Logowanie"}}/>
+                    <Drawer.Screen name="Settings" component={SettingsScreen} options={{headerTitle: "Ustawienia"}}/>
                 </>)
             }
         </Drawer.Navigator>

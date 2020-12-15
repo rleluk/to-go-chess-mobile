@@ -14,7 +14,7 @@ import { getMinWindowSize, getMaxWindowSize } from '../helpers/screen-info';
 import {closeDialog, analysisCreated, openDialog, gameObjectCreated, gameTreeUpdated, enableTreeMovement} from "../actions";
 import {ChessButton} from "./ChessButton";
 import {ChessPlayer} from '../common/core/chess-player';
-import {MobileChessboard} from './MobileChessboard';
+import MobileChessboard from './MobileChessboard';
 import GameTree from './GameTree';
 import MenuBar from './MenuBar';
 import SplashScreen from '../navigation/SplashScreen';

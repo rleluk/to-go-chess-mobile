@@ -24,7 +24,7 @@ import {
 import {SocketPlayer} from "../common/core/socket-player";
 import {ChessButton} from "./ChessButton";
 import {ChessPlayer} from '../common/core/chess-player';
-import {MobileChessboard} from './MobileChessboard';
+import MobileChessboard from './MobileChessboard';
 import ChessClockConfig from '../common/timer/chess-clock-config';
 import GameTree from './GameTree';
 import MenuBar from './MenuBar';

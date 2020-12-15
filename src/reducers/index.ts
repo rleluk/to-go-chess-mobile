@@ -4,6 +4,8 @@ const initialApp = {
     isLoading: true,
     isSignout: false,
     user: null,
+    rotateAutomatically: false,
+    chessboardRotated: false,
     stackLoading: ['Loading'],
     newAnalysis: false,
     toast: {},
@@ -131,6 +133,16 @@ const app = (state = initialApp, action: any) => {
             return {
                 ...state,
                 emoteToSend: undefined,
+            }
+        case 'TOGGLE_CHESSBOARD_ROTATION':
+            return {
+                ...state,
+                rotateAutomatically: !state.rotateAutomatically
+            }
+        case 'CHESSBOARD_ROTATED':
+            return {
+                ...state,
+                chessboardRotated: !state.chessboardRotated
             }
         default:
             return state;

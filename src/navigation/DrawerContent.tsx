@@ -322,7 +322,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                         />
                     )}
                     label="Ustawienia"
-                    onPress={() => {}}
+                    onPress={() => navigation.navigate('Settings')}
                 />
               </View>
             </Drawer.Section>

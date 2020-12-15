@@ -2,11 +2,11 @@ import React from 'react';
 import {View, ImageBackground, TouchableOpacity, StyleSheet, Image, ScrollView} from 'react-native';
 import {FunctionComponent} from 'react';
 import {bindActionCreators} from 'redux';
-import {closeDialog, gameTreeUpdated, openDialog, sendEmote} from '../actions';
+import {closeDialog, gameTreeUpdated, openDialog, sendEmote, rotateChessboard} from '../actions';
 import {connect} from 'react-redux';
 import emotes from "../utils/emotes";
 
-interface Props {style, navigation, game, gameTreeUpdated, isTreeEnabled, openDialog, closeDialog, sendEmote}
+interface Props {style, navigation, game, gameTreeUpdated, isTreeEnabled, openDialog, closeDialog, sendEmote, rotateChessboard}
 
 export const MenuBar: FunctionComponent<Props> = (props: Props) => {
     const onPreviousMovePress = () => {
@@ -27,12 +27,16 @@ export const MenuBar: FunctionComponent<Props> = (props: Props) => {
         }
     }
 
+    const onRotateClick = () => {
+        props.rotateChessboard();
+    }
+
     return (
         <ImageBackground resizeMode='contain' source={require('../images/bottom_buttons.png')} style={{...props.style, ...styles.buttonContainer}}>
               <TouchableOpacity style={styles.button} onPress={props.navigation.openDrawer}/>
               <TouchableOpacity style={styles.button} onPress={props.isTreeEnabled ? onPreviousMovePress : undefined}/>
               <TouchableOpacity style={styles.button} onPress={props.isTreeEnabled ? onNextMovePress : undefined}/>
-              <TouchableOpacity style={styles.button} onPress={() => console.log("Refresh button pressed.")}/>
+              <TouchableOpacity style={styles.button} onPress={onRotateClick}/>
               <TouchableOpacity style={styles.button} onPress={() => props.openDialog(
                   <View style={styles.wrapEmotes}>
                       <ScrollView>
@@ -82,6 +86,7 @@ const mapDispatchToProps = (dispatch: any) => ({
             openDialog,
             closeDialog,
             sendEmote,
+            rotateChessboard
         },
         dispatch,
     ),

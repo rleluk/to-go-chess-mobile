@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { useEffect, useState, FunctionComponent } from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { Chessboard } from '../common/core/chessboard';
@@ -15,6 +16,8 @@ interface Props {
     style: any;
     turn: string;
     mode: 'singleGame' | 'onlineGame' | 'twoPlayers';
+    rotateAutomatically: boolean;
+    chessboardRotated: boolean;
 }
 
 interface LastMove {
@@ -30,10 +33,21 @@ interface FirstPress {
     possibleMoves: Move[];
 }
 
-const generateGridItems = (boardInfo: BoardInfo, onPress: Function, firstPress: FirstPress | undefined, lastMove: LastMove | undefined) => {
+const generateGridItems = (boardInfo: BoardInfo, onPress: Function, firstPress: FirstPress | undefined, lastMove: LastMove | undefined, rotate: boolean) => {
     let items: any[] = [];
 
-    for(let row = 8; row >= 1; row--) {
+    var startRow, checkCondition, iterate;
+    if (rotate) {
+        startRow = 1;
+        checkCondition = (row) => row <= 8;
+        iterate = (row) => row + 1;
+    } else {
+        startRow = 8;
+        checkCondition = (row) => row >= 1;
+        iterate = (row) => row - 1;
+    }
+
+    for(let row = startRow; checkCondition(row); row = iterate(row)) {
         for(let column = 1; column <= 8; column++) {
             let piece = boardInfo.get(row, column);
             let svg = getComponent(piece);
@@ -62,7 +76,7 @@ const generateGridItems = (boardInfo: BoardInfo, onPress: Function, firstPress: 
 };
 
 
-export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
+const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
     const [boardInfo, setBoardInfo] = useState(new BoardInfo().fromFEN(props.chessboard.positionFEN));
     const [firstPress, setFirstPress] = useState<FirstPress>();
     const [lastMove, setLastMove] = useState<LastMove>();
@@ -157,8 +171,11 @@ export const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
         } 
     };
 
-    var items = generateGridItems(boardInfo, onPress, firstPress, lastMove);
-
+    const items = generateGridItems(
+        boardInfo, onPress, firstPress, lastMove, 
+        (props.rotateAutomatically && boardInfo.turn === 'black') ? !props.chessboardRotated : props.chessboardRotated
+    ); // last argument is simple logical XOR
+    
     return (
         <View style={props.style}>
             <PromotionDialog color={boardInfo.turn} isVisible={isModalVisible} modalCallback={modalCallback}/>
@@ -195,3 +212,21 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(204, 54, 24, 0.5)'
     }
 });
+
+const mapDispatchToProps = (dispatch: any) => ({});
+
+const mapStateToProps = (state: any) => {
+    const {rotateAutomatically, chessboardRotated} = state.app;
+    return {
+        rotateAutomatically,
+        chessboardRotated
+    };
+};
+
+const WrappedMobileChessboard = connect(
+    mapStateToProps,
+    mapDispatchToProps,
+)(MobileChessboard);
+
+export default WrappedMobileChessboard;
+
