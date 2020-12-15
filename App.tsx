@@ -7,7 +7,6 @@ import thunk from 'redux-thunk';
 
 import HomeScreen from './src/navigation/HomeScreen'
 import {NavigationContainer} from "@react-navigation/native";
-import {createStackNavigator} from '@react-navigation/stack';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import DrawerContent from './src/navigation/DrawerContent';
 import SignUpScreen from './src/navigation/SignUpScreen';
@@ -42,7 +41,7 @@ function App(props: any) {
       <NavigationContainer>
         <Dialog />
         <Drawer.Navigator
-            drawerStyle={{  backgroundColor: '#f2f6e7', opacity: 0.9 }}
+            drawerStyle={{  backgroundColor: 'rgba(223, 193, 157, 0.9)'}}
             drawerContent={props => <DrawerContent {...props}/>}
         >
             {
@@ -54,9 +53,9 @@ function App(props: any) {
                 />) : (<>
                     <Drawer.Screen name="Analysis" component={AnalysisScreen} options={{headerShown: false}}/>
                     <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
-                    <Drawer.Screen name="Sign up" component={SignUpScreen} options={{headerTitle: "Rejestracja"}}/>
-                    <Drawer.Screen name="Sign in" component={SignInScreen} options={{headerTitle: "Logowanie"}}/>
-                    <Drawer.Screen name="Settings" component={SettingsScreen} options={{headerTitle: "Ustawienia"}}/>
+                    <Drawer.Screen name="Sign up" component={SignUpScreen} options={{headerTitle: "Rejestracja", headerStyle: styles.header}}/>
+                    <Drawer.Screen name="Sign in" component={SignInScreen} options={{headerTitle: "Logowanie", headerStyle: styles.header}}/>
+                    <Drawer.Screen name="Settings" component={SettingsScreen} options={{headerTitle: "Ustawienia", headerStyle: styles.header}}/>
                 </>)
             }
         </Drawer.Navigator>
@@ -64,6 +63,12 @@ function App(props: any) {
       </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+    header: {
+        backgroundColor: 'rgba(223, 193, 157, 0.8)',
+    },
+});
 
 const mapStateToProps = (state: any) => {
     const {user, isLoading, isSignout, stackLoading} = state.app;

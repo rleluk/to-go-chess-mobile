@@ -198,7 +198,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
               {(config && config.mode === 'onlineGame') &&
               <View style={styles.drawerSection}>
                 <DrawerItem
-                    style={styles.inGameOptions}
+                    style={{...styles.inGameOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <MaterialCommunityIcon
                             name="handshake"
@@ -213,7 +213,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                     }}
                 />
                 <DrawerItem
-                    style={styles.inGameOptions}
+                    style={{...styles.inGameOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <FontAwesome5Icon
                             name="chess-king"
@@ -230,7 +230,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
               </View>}
               <View style={styles.drawerSection}>
                 <DrawerItem
-                    style={styles.newGameOptions}
+                    style={{...styles.newGameOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <MaterialIcon
                             name="computer"
@@ -239,12 +239,13 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                         />
                     )}
                     label="Gra z komputerem"
+                    labelStyle={styles.labelStyle}
                     onPress={ () => {
                       chooseConfig('singleGame');
                     }}
                 />
                 <DrawerItem
-                    style={styles.newGameOptions}
+                    style={{...styles.newGameOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <IonIcon
                             name="person"
@@ -253,12 +254,13 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                         />
                     )}
                     label="Gra online"
+                    labelStyle={styles.labelStyle}
                     onPress={ () => {
                       chooseConfig('onlineGame');
                     }}
                 />
                 <DrawerItem
-                    style={styles.newGameOptions}
+                    style={{...styles.newGameOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <IonIcon
                             name="people"
@@ -267,6 +269,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                         />
                     )}
                     label="Dwoje graczy"
+                    labelStyle={styles.labelStyle}
                     onPress={ () => {
                       chooseClockType('twoPlayers', 'white');
                     }}
@@ -274,7 +277,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
               </View>
               <View style={styles.drawerSection}>
                 <DrawerItem
-                    style={styles.otherOptions}
+                    style={{...styles.otherOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <MaterialCommunityIcon
                             name="google-analytics"
@@ -283,13 +286,14 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                         />
                     )}
                     label="Analiza partii"
+                    labelStyle={styles.labelStyle}
                     onPress={() => {
                       createAnalysis();
                       navigation.navigate('Analysis');
                     }}
                 />
                 <DrawerItem
-                    style={styles.otherOptions}
+                    style={{...styles.otherOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <MaterialCommunityIcon
                             name="database-import"
@@ -298,10 +302,11 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                         />
                     )}
                     label="Importuj"
+                    labelStyle={styles.labelStyle}
                     onPress={() => importPGN()}
                 />
                 <DrawerItem
-                    style={styles.otherOptions}
+                    style={{...styles.otherOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <MaterialCommunityIcon
                             name="database-export"
@@ -310,10 +315,11 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                         />
                     )}
                     label="Eksportuj"
+                    labelStyle={styles.labelStyle}
                     onPress={() => exportPGN()}
                 />
                 <DrawerItem
-                    style={styles.otherOptions}
+                    style={{...styles.otherOptions, ...styles.boxShadow}}
                     icon={({color, size}) => (
                         <IonIcon
                             name="settings"
@@ -322,6 +328,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                         />
                     )}
                     label="Ustawienia"
+                    labelStyle={styles.labelStyle}
                     onPress={() => navigation.navigate('Settings')}
                 />
               </View>
@@ -329,18 +336,20 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
           </View>
           <View style={styles.drawerSection}>
             {user ? (
-                <DrawerItem style={styles.bottomDrawerOptions}
+                <DrawerItem style={{...styles.bottomDrawerOptions, ...styles.boxShadow}}
                             icon={({ color, size }) => (
                                 <IonIcon name="exit-outline" color={color} size={size} />
                             )}
                             label="Wyloguj się"
+                            labelStyle={styles.labelStyle}
                             onPress={logout}
                 />) : (
-                <DrawerItem style={styles.bottomDrawerOptions}
+                <DrawerItem style={{...styles.bottomDrawerOptions, ...styles.boxShadow}}
                             icon={({ color, size }) => (
                                 <IonIcon name="enter-outline" color={color} size={size} />
                             )}
                             label="Zaloguj się"
+                            labelStyle={styles.labelStyle}
                             onPress={() => {
                               navigation.navigate('Sign in');
                             }}
@@ -411,30 +420,45 @@ const styles = StyleSheet.create({
   bottomDrawerOptions: {
     marginLeft: 0,
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: 'black',
-    backgroundColor: '#faffc4'
+    borderWidth: 2,
+    borderColor: '#707070',
+    backgroundColor: '#faffc4',
   },
   newGameOptions: {
     marginLeft: 0,
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: 'black',
-    backgroundColor: '#b8e5f3'
+    borderWidth: 2,
+    borderColor: '#707070',
+    backgroundColor: '#b8e5f3',
   },
   inGameOptions: {
     marginLeft: 0,
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: 'black',
-    backgroundColor: '#caebc0'
+    borderWidth: 2,
+    borderColor: '#707070',
+    backgroundColor: '#caebc0',
   },
   otherOptions: {
     marginLeft: 0,
     borderRadius: 0,
-    borderWidth: 1,
-    borderColor: 'black',
-    backgroundColor: '#ecead1'
+    borderWidth: 2,
+    borderColor: '#707070',
+    backgroundColor: '#ecead1',
+  },
+  labelStyle: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#707070'
+  },
+  boxShadow: {
+    shadowColor: "#707070",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   }
 });
 

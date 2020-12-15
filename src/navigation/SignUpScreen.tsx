@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Text, Button, StyleSheet, View, TextInput} from "react-native";
+import {Text, Button, StyleSheet, View, TextInput, ImageBackground} from "react-native";
 import auth from '@react-native-firebase/auth';
 import {bindActionCreators} from "redux";
 import {loaded, loading} from "../actions";
@@ -34,7 +34,7 @@ const SignUpScreen = ({navigation, loading, loaded}: any) => {
     }
 
     return (
-        <>
+        <ImageBackground source={require('../images/togochessbackground.jpg')} style={{width: '100%', height: '100%'}}>
             <TextInput
                 placeholder={"E-mail"}
                 onChangeText={text => setEmail(text)}
@@ -45,7 +45,7 @@ const SignUpScreen = ({navigation, loading, loaded}: any) => {
                 onChangeText={text => setPassword(text)}
                 value={password} />
             <Button title={"Zarejestruj się"} onPress={() => authentication(email, password)} />
-        </>
+        </ImageBackground>
     );
 }
 

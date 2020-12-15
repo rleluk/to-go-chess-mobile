@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
-import {Button, TextInput} from "react-native";
+import {Button, TextInput, ImageBackground} from "react-native";
 import auth from "@react-native-firebase/auth";
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import { GoogleSignin } from '@react-native-community/google-signin';
-import {err} from "react-native-svg/lib/typescript/xml";
 import {bindActionCreators} from "redux";
 import {loading, loaded} from "../actions";
 import {connect, Provider} from "react-redux";
@@ -65,7 +64,7 @@ const SignInScreen = ({navigation, loading, loaded}: any) => {
     }
 
     return (
-        <>
+        <ImageBackground source={require('../images/togochessbackground.jpg')} style={{width: '100%', height: '100%'}}>
             <TextInput
                 placeholder={"E-mail"}
                 onChangeText={text => setEmail(text)}
@@ -97,7 +96,7 @@ const SignInScreen = ({navigation, loading, loaded}: any) => {
                 })}
             />
             <Button onPress={() => navigation.navigate('Sign up')} title={"Zarejestruj się"} />
-        </>
+        </ImageBackground>
     );
 }
 
