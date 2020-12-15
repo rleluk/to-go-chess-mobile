@@ -47,8 +47,8 @@ export const GameInfo: FunctionComponent<Props> = (props: Props) => {
             </View>
             <View style={styles.playerContainer}>
                 <View style={styles.whiteBox}/>
-                <Text style={styles.player}>Player 1</Text>
-                <Text style={styles.player}>Player 2</Text>
+                {/* <Text style={styles.player}>Player 1</Text>
+                <Text style={styles.player}>Player 2</Text> */}
                 <View style={styles.blackBox}/>
             </View>
         </View>

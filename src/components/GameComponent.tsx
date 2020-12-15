@@ -150,7 +150,7 @@ class GameComponent extends React.Component<Props, State> {
             }
         }
         this.ws.onopen = () => {
-            this.ws.send(JSON.stringify({type: 'newGame', color}));
+            this.ws.send(JSON.stringify({type: 'newGame', color, clockType}));
         }
         this.ws.onmessage = (event) => {
             let msg = JSON.parse(String(event.data));
@@ -275,7 +275,10 @@ class GameComponent extends React.Component<Props, State> {
             toAdd: 5000
         }
         game.init({canvas: chessboard, whitePlayer: wp, blackPlayer: bp, chessClockConfig: clockConfig});
-
+        if (this.mode === 'onlineGame') {
+            // @ts-ignore
+            opponent.setChessClock(game.getChessClock());
+        }
         this.props.gameObjectCreated(game);
         this.props.disableTreeMovement();
         console.log('disabling tree movement')
@@ -300,7 +303,7 @@ class GameComponent extends React.Component<Props, State> {
                     onPress={() => {
                         const color = this.color === 'white' ? 'black' : 'white';
                         this.props.closeDialog();
-                        this.newGame(color);
+                        this.newGame(color, clockConfig.mode.type);
                     }}
                     title={'Zagraj jeszcze raz'}
                 />

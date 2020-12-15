@@ -51,8 +51,8 @@ function App(props: any) {
                     component={SplashScreen}
                     options={{headerShown: false}}
                 />) : (<>
-                    <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
                     <Drawer.Screen name="Analysis" component={AnalysisScreen} options={{headerShown: false}}/>
+                    <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
                     <Drawer.Screen name="Sign up" component={SignUpScreen} />
                     <Drawer.Screen name="Sign in" component={SignInScreen} />
                 </>)
