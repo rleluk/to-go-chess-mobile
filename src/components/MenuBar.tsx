@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     wrapEmotes: {
-        maxHeight: 300,
+        maxHeight: 150,
         maxWidth: 250,
         flexDirection: "column",
         alignItems: "center",

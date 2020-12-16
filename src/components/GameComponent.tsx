@@ -34,7 +34,7 @@ import emotes from "../utils/emotes";
 
 const clockConfig: ChessClockConfig = {
     initMsBlack: 300 * 1000,
-    initMsWhite: 300 * 1000,
+    initMsWhite: 10 * 1000,
     stepBlack: 1,
     stepWhite: 1,
     mode: {
@@ -81,12 +81,21 @@ class GameComponent extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        console.log(this.state.game)
+        if (this.state.game) {
+            console.log('halo')
+            this.state.game.stopClock();
+        }
         this.mode = 'twoPlayers';
         this.newGame(undefined, 'standard');
     }
 
     componentDidUpdate(prevProps:Readonly<Props>) {
         if (this.props.newGame) {
+            if (this.state.game) {
+                console.log('halo')
+                this.state.game.stopClock();
+            }
             this.mode = this.props.config.mode;
             this.newGame();
             this.props.gameCreated();
@@ -105,6 +114,14 @@ class GameComponent extends React.Component<Props, State> {
                 this.ws.send(JSON.stringify({type: 'emote', emote: this.props.emoteToSend}));
             }
             this.props.emoteSent();
+        }
+    }
+
+    componentWillUnmount() {
+        console.log("unmount", this.state.game)
+        if (this.state.game) {
+            console.log('halo')
+            this.state.game.stopClock();
         }
     }
 

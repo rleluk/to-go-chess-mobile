@@ -206,10 +206,16 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(161, 148, 10, 0.6)'
     },
     highlightedPossibleMove: {
-        backgroundColor: 'rgba(22, 141, 181, 0.5)'
+        borderWidth: 1, 
+        borderColor: '#292929',
+        borderRadius: 6,
+        backgroundColor: 'rgba(97, 194, 253, 0.6)'
     },
     highlightedPossibleCapture: {
-        backgroundColor: 'rgba(204, 54, 24, 0.5)'
+        borderWidth: 1, 
+        borderColor: '#292929',
+        borderRadius: 6,
+        backgroundColor: 'rgba(204, 54, 24, 0.6)'
     }
 });
 

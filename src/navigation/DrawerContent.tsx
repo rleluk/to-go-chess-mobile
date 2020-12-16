@@ -103,22 +103,22 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                       name: refInput ? refInput : placeholder,
                       pgn: contents
                     }).then(() => {
-                      openDialog(<Text>Pomyślnie zapisaono partię</Text>);
+                      openDialog(<Text>Pomyślnie zapisaono partię.</Text>);
                     }).catch(() => {
-                      openDialog(<Text>Błąd, nie udało się zapisać partii</Text>);
+                      openDialog(<Text>Błąd, nie udało się zapisać partii.</Text>);
                     });
                     openDialog(<Text>Zapisywanie...</Text>);
                   }}
                   title={'Zapisz na koncie'}/>
                 </>
-                : <Text>Zaloguj się aby zapisać dane na koncie</Text>
+                : <Text style={{color: '#606060aa', margin: 10, fontSize: 12}}>Zaloguj się aby zapisać dane na koncie.</Text>
             }
-            <FilenameInput buttonText="Zapisz w pamięci" onPress={game ? onPress : undefined} style={{width: 200}}/>
+            <FilenameInput buttonText="Zapisz w pamięci telefonu" onPress={game ? onPress : undefined} style={{width: 200}}/>
           </>
       );
     }
     else {
-      openDialog(<Text>Brak danych do wyeksportowania</Text>);
+      openDialog(<Text>Brak danych do wyeksportowania.</Text>);
     }
   };
 
@@ -173,11 +173,11 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
               <>
                 <List />
               </>
-              : <Text>Zaloguj się aby wczytać zapisane partie</Text>
+              : <Text style={{color: '#606060aa', margin: 10, fontSize: 12}}>Zaloguj się aby wczytać zapisaną partię.</Text>
           }
         <FilenameInput buttonText="Importuj z pamięci" onPress={onPress} style={{width: 200}}/>
         </>
-        );
+    );
   };
 
 
