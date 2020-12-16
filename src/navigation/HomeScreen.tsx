@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import GameComponent from "../components/GameComponent";
-import {StyleSheet, View, StatusBar} from "react-native";
+import {StyleSheet, View} from "react-native";
 import UserBar from "../components/UserBar";
 
 
@@ -12,7 +12,6 @@ const HomeScreen = ({route, navigation}: any) => {
 
     return (
         <>
-            <StatusBar hidden />
             {/* <UserBar navigation={navigation} /> */}
             <View style={styles.container}>
                 <GameComponent route={route} navigation={navigation}/>

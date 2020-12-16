@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import GameAnalysis from "../components/GameAnalysis";
-import {StyleSheet, View, StatusBar} from "react-native";
+import {StyleSheet, View} from "react-native";
 
 
 const AnalysisScreen = ({route, navigation}: any) => {
@@ -11,7 +11,6 @@ const AnalysisScreen = ({route, navigation}: any) => {
 
     return (
         <>
-            <StatusBar hidden />
             <View style={styles.container}>
                 <GameAnalysis route={route} navigation={navigation}/>
             </View>

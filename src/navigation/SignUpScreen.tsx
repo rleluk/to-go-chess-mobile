@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Text, Button, StyleSheet, View, TextInput, ImageBackground} from "react-native";
+import {Text, StyleSheet, View, TextInput, ImageBackground} from "react-native";
 import auth from '@react-native-firebase/auth';
 import {bindActionCreators} from "redux";
 import {loaded, loading} from "../actions";
@@ -13,26 +13,28 @@ const SignUpScreen = ({navigation, loading, loaded}: any) => {
     const [password, setPassword] = useState('');
 
     const authentication = (email: string, password: string) => {
-        loading('Login');
-        auth()
-            .createUserWithEmailAndPassword(email, password)
-            .then(() => {
-                console.log('User account created & signed in!');
-                navigation.navigate('Home');
-                loaded('Login');
-            })
-            .catch(error => {
-                if (error.code === 'auth/email-already-in-use') {
-                    console.log('That email address is already in use!');
-                }
-
-                if (error.code === 'auth/invalid-email') {
-                    console.log('That email address is invalid!');
-                }
-
-                console.log(error);
-                loaded('Login');
-            });
+        if (email !== '' && password !== '') {
+            loading('Login');
+            auth()
+                .createUserWithEmailAndPassword(email, password)
+                .then(() => {
+                    console.log('User account created & signed in!');
+                    navigation.navigate('Home');
+                    loaded('Login');
+                })
+                .catch(error => {
+                    if (error.code === 'auth/email-already-in-use') {
+                        console.log('That email address is already in use!');
+                    }
+    
+                    if (error.code === 'auth/invalid-email') {
+                        console.log('That email address is invalid!');
+                    }
+    
+                    console.log(error);
+                    loaded('Login');
+                });
+        }
     }
 
     return (

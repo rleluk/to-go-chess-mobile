@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, StatusBar} from 'react-native';
 
 import {Provider, connect} from 'react-redux';
 import {createStore, applyMiddleware, bindActionCreators} from 'redux';
@@ -40,6 +40,7 @@ function App(props: any) {
     return (
       <NavigationContainer>
         <Dialog />
+        <StatusBar hidden/>
         <Drawer.Navigator
             drawerStyle={{  backgroundColor: 'rgba(223, 193, 157, 0.9)'}}
             drawerContent={props => <DrawerContent {...props}/>}
@@ -51,11 +52,11 @@ function App(props: any) {
                     component={SplashScreen}
                     options={{headerShown: false}}
                 />) : (<>
-                    <Drawer.Screen name="Analysis" component={AnalysisScreen} options={{headerShown: false}}/>
-                    <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
-                    <Drawer.Screen name="Sign up" component={SignUpScreen} options={{headerTitle: "Rejestracja", headerStyle: styles.header}}/>
-                    <Drawer.Screen name="Sign in" component={SignInScreen} options={{headerTitle: "Logowanie", headerStyle: styles.header}}/>
-                    <Drawer.Screen name="Settings" component={SettingsScreen} options={{headerTitle: "Ustawienia", headerStyle: styles.header}}/>
+                    <Drawer.Screen name="Analysis" component={AnalysisScreen} options={{headerShown: false, unmountOnBlur: true}}/>
+                    <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false, unmountOnBlur: true}}/>
+                    <Drawer.Screen name="Sign up" component={SignUpScreen} options={{headerTitle: "Rejestracja", headerStyle: styles.header, unmountOnBlur: true}}/>
+                    <Drawer.Screen name="Sign in" component={SignInScreen} options={{headerTitle: "Logowanie", headerStyle: styles.header, unmountOnBlur: true}}/>
+                    <Drawer.Screen name="Settings" component={SettingsScreen} options={{headerTitle: "Ustawienia", headerStyle: styles.header, unmountOnBlur: true}}/>
                 </>)
             }
         </Drawer.Navigator>

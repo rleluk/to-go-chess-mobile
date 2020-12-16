@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View, Text, ImageBackground} from "react-native";
+import {StyleSheet, Text, ImageBackground} from "react-native";
 
 interface Props {
     navigation?: any;

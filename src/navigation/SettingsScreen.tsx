@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {StyleSheet, View, StatusBar, Text, Switch, ImageBackground} from "react-native";
+import {StyleSheet, View, Text, Switch, ImageBackground} from "react-native";
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
 import {toggleAutomaticRotation} from "../actions";
@@ -7,7 +7,6 @@ import {toggleAutomaticRotation} from "../actions";
 const SettingsScreen = ({toggleAutomaticRotation, rotateAutomatically}: any) => {
     return (
         <ImageBackground source={require('../images/togochessbackground.jpg')} style={{width: '100%', height: '100%'}}>
-            <StatusBar hidden />
             <View style={{display: 'flex'}}>
                 <View style={styles.setting}>
                     <Text style={{fontSize: 16, color: '#707070', marginTop: 1}}>
