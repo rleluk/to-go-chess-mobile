@@ -171,11 +171,9 @@ const MobileChessboard: FunctionComponent<Props> = (props: Props) => {
         } 
     };
 
-    const items = generateGridItems(
-        boardInfo, onPress, firstPress, lastMove, 
-        (props.rotateAutomatically && boardInfo.turn === 'black') ? !props.chessboardRotated : props.chessboardRotated
-    ); // last argument is simple logical XOR
-    
+    const rotate = (props.rotateAutomatically && boardInfo.turn === 'black') ? !props.chessboardRotated : props.chessboardRotated;
+    const items = generateGridItems(boardInfo, onPress, firstPress, lastMove, rotate); // last argument is simple logical XOR
+
     return (
         <View style={props.style}>
             <PromotionDialog color={boardInfo.turn} isVisible={isModalVisible} modalCallback={modalCallback}/>

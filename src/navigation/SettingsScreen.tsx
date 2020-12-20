@@ -1,14 +1,15 @@
 import React, {useEffect} from 'react';
 import {StyleSheet, View, Text, Switch, ImageBackground} from "react-native";
+import {Picker} from '@react-native-picker/picker';
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import {toggleAutomaticRotation} from "../actions";
+import {toggleAutomaticRotation, changeBotLevel} from "../actions";
 
-const SettingsScreen = ({toggleAutomaticRotation, rotateAutomatically}: any) => {
+const SettingsScreen = ({toggleAutomaticRotation, rotateAutomatically, botLevel, changeBotLevel}: any) => {
     return (
         <ImageBackground source={require('../images/togochessbackground.jpg')} style={{width: '100%', height: '100%'}}>
             <View style={{display: 'flex'}}>
-                <View style={styles.setting}>
+                <View style={{...styles.setting, ...styles.boxShadow}}>
                     <Text style={{fontSize: 16, color: '#707070', marginTop: 1}}>
                         Automatyczna rotacja szachownicy
                     </Text>
@@ -21,6 +22,22 @@ const SettingsScreen = ({toggleAutomaticRotation, rotateAutomatically}: any) => 
                         accessibilityHint="halo"
                         style={{marginLeft: 20}}
                     />
+                </View>
+                <View style={{...styles.setting, ...styles.boxShadow}}>
+                    <Text style={{fontSize: 16, color: '#707070', marginTop: 1}}>
+                        Poziom trudności silnika
+                    </Text>
+                    <View style={{borderWidth: 1, borderColor: '#70707099', borderRadius: 6}}>
+                        <Picker
+                            selectedValue={botLevel}
+                            onValueChange={(itemValue, itemIndex) => changeBotLevel(itemValue)}
+                            style={{height: 30, width: 100}}
+                        >
+                            <Picker.Item label="5" value="5"/>
+                            <Picker.Item label="10" value="10"/>
+                            <Picker.Item label="15" value="15"/>
+                        </Picker>
+                    </View>
                 </View>
             </View>
         </ImageBackground>
@@ -37,6 +54,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'center',
         height: 50,
+        backgroundColor: "#ecead1"
+    },
+    boxShadow: {
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
@@ -45,21 +65,22 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
-        backgroundColor: "#ecead1"
-    },
+    }
 });
 
 const mapStateToProps = (state: any) => {
-    const {rotateAutomatically} = state.app;
+    const {rotateAutomatically, botLevel} = state.app;
     return {
-        rotateAutomatically
+        rotateAutomatically,
+        botLevel
     };
 };
 
 const mapDispatchToProps = (dispatch: any) => ({
 ...bindActionCreators(
     {
-        toggleAutomaticRotation
+        toggleAutomaticRotation,
+        changeBotLevel
     },
     dispatch,
 ),

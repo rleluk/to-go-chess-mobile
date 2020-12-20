@@ -34,7 +34,7 @@ import emotes from "../utils/emotes";
 
 const clockConfig: ChessClockConfig = {
     initMsBlack: 300 * 1000,
-    initMsWhite: 10 * 1000,
+    initMsWhite: 300 * 1000,
     stepBlack: 1,
     stepWhite: 1,
     mode: {
@@ -58,7 +58,7 @@ interface Props {
     closeDialog: any; gameCreated: any; openDialog: any; gameObjectCreated: any; gameTreeUpdated: any; disableTreeMovement: any;
     openToast: any; closeToast: any; gameInProgress: any; emoteSent: any;
     //store
-    newGame: any; config: any; status: any, emoteToSend: any;
+    newGame: any; config: any; status: any, emoteToSend: any; botLevel: number;
 }
 
 class GameComponent extends React.Component<Props, State> {
@@ -205,7 +205,7 @@ class GameComponent extends React.Component<Props, State> {
             }
         }
         this.ws.onopen = () => {
-            this.ws.send(JSON.stringify({type: 'newAiGame', color}));
+            this.ws.send(JSON.stringify({type: 'newAiGame', color, botLevel: this.props.botLevel}));
         }
         this.ws.onmessage = (event) => {
             let msg = JSON.parse(String(event.data));
@@ -413,12 +413,13 @@ const mapDispatchToProps = (dispatch: any) => ({
 });
 
 const mapStateToProps = (state: any) => {
-    const {config, newGame, status, emoteToSend} = state.app;
+    const {config, newGame, status, emoteToSend, botLevel} = state.app;
     return {
         config,
         newGame,
         status,
         emoteToSend,
+        botLevel
     };
 };
 

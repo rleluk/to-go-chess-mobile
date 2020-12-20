@@ -180,6 +180,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
     );
   };
 
+  let username = user ? user.email : 'Gość';
 
   return (
       <View style={{ flex: 1 }}>
@@ -189,8 +190,10 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
               <View style={{ flexDirection: 'row', marginTop: 15 }}>
                 <Avatar.Image source={require('../images/guest.png')} size={60} />
                 <View style={{ marginLeft: 15, flexDirection: 'column' }}>
-                  <Title style={styles.title}>John Doe</Title>
-                  <Caption style={styles.caption}>1222</Caption>
+                  <Title style={styles.title}> 
+                    {username}
+                  </Title>
+                  <Caption style={styles.caption}>1000</Caption>
                 </View>
               </View>
             </View>
@@ -470,7 +473,7 @@ const mapStateToProps = (state: any) => {
     isSignout,
     stackLoading,
     game,
-    config
+    config,
   };
 };
 
