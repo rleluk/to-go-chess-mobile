@@ -5,7 +5,7 @@ import {Provider, connect} from 'react-redux';
 import {createStore, applyMiddleware, bindActionCreators} from 'redux';
 import thunk from 'redux-thunk';
 
-import HomeScreen from './src/navigation/HomeScreen'
+import GameScreen from './src/navigation/GameScreen'
 import {NavigationContainer} from "@react-navigation/native";
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import DrawerContent from './src/navigation/DrawerContent';
@@ -53,7 +53,7 @@ function App(props: any) {
                     options={{headerShown: false}}
                 />) : (<>
                     <Drawer.Screen name="Analysis" component={AnalysisScreen} options={{headerShown: false, unmountOnBlur: true}}/>
-                    <Drawer.Screen name="Home" component={HomeScreen} options={{headerShown: false, unmountOnBlur: true}}/>
+                    <Drawer.Screen name="Game" component={GameScreen} options={{headerShown: false, unmountOnBlur: true}}/>
                     <Drawer.Screen name="Sign up" component={SignUpScreen} options={{headerTitle: "Rejestracja", headerStyle: styles.header, unmountOnBlur: true}}/>
                     <Drawer.Screen name="Sign in" component={SignInScreen} options={{headerTitle: "Logowanie", headerStyle: styles.header, unmountOnBlur: true}}/>
                     <Drawer.Screen name="Settings" component={SettingsScreen} options={{headerTitle: "Ustawienia", headerStyle: styles.header, unmountOnBlur: true}}/>

@@ -4,7 +4,7 @@ import {StyleSheet, View} from "react-native";
 import UserBar from "../components/UserBar";
 
 
-const HomeScreen = ({route, navigation}: any) => {
+const GameScreen = ({route, navigation}: any) => {
 
     useEffect(() => {
         console.log("route.params =", route.params);
@@ -28,4 +28,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HomeScreen;
+export default GameScreen;

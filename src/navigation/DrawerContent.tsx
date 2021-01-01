@@ -30,14 +30,14 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
           <TouchableOpacity style={styles.clockType} onPress={() => {
             closeDialog();
             createGame({mode, color, clockType: 'standard'});
-            navigation.navigate('Home');
+            navigation.navigate('Game');
           }} >
             <Text style={{fontWeight: 'bold', color: 'brown'}}>Standard</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.clockType} onPress={() => {
             closeDialog();
             createGame({mode, color, clockType: 'fischer'});
-            navigation.navigate('Home');
+            navigation.navigate('Game');
           }}>
             <Text style={{fontWeight: 'bold', color: 'brown'}}>Fischer</Text>
           </TouchableOpacity>
@@ -212,7 +212,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                     label="Zaproponuj remis"
                     onPress={() => {
                       drawOffer();
-                      navigation.navigate('Home');
+                      navigation.navigate('Game');
                     }}
                 />
                 <DrawerItem
@@ -227,7 +227,7 @@ const DrawerContent = ({navigation, user, createGame, openDialog, drawOffer, sur
                     label="Poddaj się"
                     onPress={() => {
                       surrender();
-                      navigation.navigate('Home');
+                      navigation.navigate('Game');
                     }}
                 />
               </View>}
