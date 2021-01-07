@@ -46,8 +46,6 @@ To install project dependencies, in root folder run:
 npm install
 ```
 
-Clone https://github.com/hipek146/to-go-chess-common repository and put all the files to /common directory.
-
 # Run application
 To run app, first of all open your android emulator (for instance Galaxy Nexus API 22 - needs to be installed from Android Studio's AVD Manager) and execute:
 ```bash
